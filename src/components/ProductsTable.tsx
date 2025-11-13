@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Product } from '../types';
+import type { Product } from '../types';
 
 export function ProductsTable({ products }: { products: Product[] }) {
   return (

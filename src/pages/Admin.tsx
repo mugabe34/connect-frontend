@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api';
-import { User, Product } from '../types';
+import type { User, Product } from '../types';
 import { LayoutDashboard, Users, Package, ShoppingCart, LineChart, Settings } from 'lucide-react';
 import { DashboardCard } from '../components/DashboardCard';
 import { UsersTable } from '../components/UsersTable';

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api'
-import { Product } from '../types'
+import type { Product } from '../types'
 import { Users, Package, Star, Search, X, Facebook, Instagram, Twitter } from 'lucide-react'
 
 export function Home() {
