@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import type { Product } from '../types';
 import { Search, ChevronDown, Tag, MessageSquare, Heart } from 'lucide-react';
+import { useAuth } from '../providers/AuthProvider';
 
 // Define card variants for a smoother, more deliberate hover animation
 const cardVariants = {
@@ -30,14 +31,34 @@ export function Products() {
  const [items, setItems] = useState<Product[]>([]);
  const [q, setQ] = useState('');
  const [searchTrigger, setSearchTrigger] = useState(0);
+ const { user } = useAuth();
+ const [liked, setLiked] = useState<{[id: string]: boolean}>({});
 
  useEffect(() => {
  async function load() {
- const data = await api<Product[]>(`/api/products${q ? `?q=${encodeURIComponent(q)}` : ''}`);
+ let url = '/api/products';
+ if (user?.role === 'seller') {
+ url = `/api/products/seller/${user.id}`;
+ } else if (q) {
+ url += `?q=${encodeURIComponent(q)}`;
+ }
+ const data = await api<Product[]>(url);
  setItems(data);
  }
  load();
- }, [q, searchTrigger]);
+ }, [q, searchTrigger, user]);
+
+ const handleLike = (id: string) => {
+ setLiked(prev => ({ ...prev, [id]: !prev[id] }));
+ // TODO: Call backend endpoint to persist like if implemented
+ };
+
+ const handleWhatsApp = (phone?: string, title?: string) => {
+ if (!phone) return;
+ const msg = title ? `Hello, I'm interested in your product: ${title}` : 'Hello, I am interested in your product.';
+ const url = `https://wa.me/${phone.replace(/[^\d]/g, '')}?text=${encodeURIComponent(msg)}`;
+ window.open(url, '_blank');
+ };
 
  return (
  <div className={`bg-gray-50/50 min-h-screen py-12`}>
@@ -130,15 +151,18 @@ export function Products() {
  <motion.button
  className={`flex-1 flex items-center justify-center gap-1 px-2 py-2 rounded-lg border border-sky-200 text-sky-600 font-medium text-sm hover:bg-sky-50 transition duration-200`}
  whileTap={{ scale:0.95 }}
+ onClick={() => handleWhatsApp(p.contact?.phone, p.title)}
+ disabled={!p.contact?.phone}
  >
- <MessageSquare className='h-4 w-4' /> Contact
+ <MessageSquare className='h-4 w-4' /> WhatsApp
  </motion.button>
  <motion.button
- className={`px-3 py-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 transition duration-200`}
+ className={`px-3 py-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 transition duration-200 ${liked[p.id] ? 'bg-pink-100 text-pink-600' : ''}`}
  whileTap={{ scale:0.95 }}
  aria-label="Favorite"
+ onClick={() => handleLike(p.id)}
  >
- <Heart className='h-5 w-5' />
+ <Heart className='h-5 w-5' fill={liked[p.id] ? '#ec4899' : 'none'} />
  </motion.button>
  </div>
  </motion.div>
