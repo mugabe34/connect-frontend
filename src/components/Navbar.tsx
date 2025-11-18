@@ -3,7 +3,6 @@ import { useAuth } from '../providers/AuthProvider';
 import { motion } from 'framer-motion';
 import { useState } from 'react'
 import conlogo from '../assets/conlogo.png'
-// Import only needed icons
 import {
  Home,
  Package,
@@ -11,6 +10,10 @@ import {
  ChevronDown,
  LockKeyhole,
  LogIn,
+ Users,
+ Info,
+ PhoneCall,
+ UserPlus
 } from 'lucide-react';
 
 export function Navbar() {
@@ -40,6 +43,18 @@ export function Navbar() {
  <div className="hidden md:flex items-center gap-8">
  <NavLink to="/" className={getNavLinkClass}>
  <Home className='h-4 w-4' /> Home
+ </NavLink>
+ <NavLink to="/contact" className={getNavLinkClass}>
+ <PhoneCall className='h-4 w-4' /> Contact Us
+ </NavLink>
+ <NavLink to="/sellers" className={getNavLinkClass}>
+ <Users className='h-4 w-4' /> Sellers
+ </NavLink>
+ <NavLink to="/about" className={getNavLinkClass}>
+ <Info className='h-4 w-4' /> About
+ </NavLink>
+ <NavLink to="/auth" className={getNavLinkClass}>
+ <UserPlus className='h-4 w-4' /> Sign In/Sign Up
  </NavLink>
  <NavLink to="/products" className={getNavLinkClass}>
  <Package className='h-4 w-4' /> Products
@@ -120,6 +135,10 @@ export function Navbar() {
  <div className="md:hidden border-t bg-white">
  <div className="container-max py-4 space-y-3">
  <NavLink to="/" onClick={() => setOpen(false)} className="block">Home</NavLink>
+ <NavLink to="/contact" onClick={() => setOpen(false)} className="block">Contact Us</NavLink>
+ <NavLink to="/sellers" onClick={() => setOpen(false)} className="block">Sellers</NavLink>
+ <NavLink to="/about" onClick={() => setOpen(false)} className="block">About</NavLink>
+ <NavLink to="/auth" onClick={() => setOpen(false)} className="block">Sign In/Sign Up</NavLink>
  <NavLink to="/products" onClick={() => setOpen(false)} className="block">Products</NavLink>
  {(role === 'seller' || role === 'admin') && (
  <NavLink to="/dashboard" onClick={() => setOpen(false)} className="block">Dashboard</NavLink>
