@@ -4,20 +4,18 @@ import { motion } from 'framer-motion';
 import { useState } from 'react'
 import conlogo from '../assets/conlogo.png'
 import {
- Home,
- Package,
- LayoutDashboard,
- ChevronDown,
- LockKeyhole,
- LogIn,
- Users,
- Info,
- PhoneCall,
- UserPlus
+Home,
+LayoutDashboard,
+LockKeyhole,
+LogIn,
+Users,
+Info,
+PhoneCall,
+UserPlus
 } from 'lucide-react';
 
 export function Navbar() {
- const { role, setRole } = useAuth();
+ const { role } = useAuth();
  const navigate = useNavigate();
  const [open, setOpen] = useState(false)
 
@@ -56,10 +54,6 @@ export function Navbar() {
  <NavLink to="/auth" className={getNavLinkClass}>
  <UserPlus className='h-4 w-4' /> Sign In/Sign Up
  </NavLink>
- <NavLink to="/products" className={getNavLinkClass}>
- <Package className='h-4 w-4' /> Products
- </NavLink>
- 
  {(role === 'seller' || role === 'admin') && (
  <NavLink to="/dashboard" className={getNavLinkClass}>
  <LayoutDashboard className='h-4 w-4' /> Dashboard
@@ -73,52 +67,18 @@ export function Navbar() {
  )}
  </div>
 
- {/* Role Switcher and Action Buttons */}
- <div className="hidden md:flex items-center gap-4">
- 
- {/* Role Switcher (Pure Icon & Professional Styling) */}
- <div className="relative">
- <ChevronDown className='absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none z-10' />
- <select
- aria-label="Role"
- className={`border border-gray-300 rounded-full pl-3 pr-8 py-2 text-sm appearance-none bg-white font-medium text-gray-700 shadow-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition duration-200`}
- value={role}
- onChange={(e) => {
- const next = e.target.value as any
- setRole(next)
- if (next === 'seller') navigate('/auth/seller')
- if (next === 'admin') navigate('/auth/admin')
- }}
- >
- <option value="guest">Guest View</option>
- <option value="buyer">Buyer</option>
- <option value="seller">Seller</option>
- <option value="admin">Admin</option>
- </select>
- </div>
-
- {/* Admin Login Button (Secondary Action) */}
- <motion.button
- whileHover={{ scale:1.05 }}
- whileTap={{ scale:0.98 }}
- onClick={() => navigate('/admin')}
- className={`hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 transition duration-300`}
- >
- <LockKeyhole className='h-4 w-4' />
- <span>Admin Login</span>
- </motion.button>
- 
- {/* Primary Action Button (Seller CTA) */}
- <motion.button
- whileHover={{ scale:1.05 }}
- whileTap={{ scale:0.98 }}
- onClick={() => navigate('/auth/seller')}
- className={`flex items-center gap-2 px-5 py-2 rounded-full bg-orange-600 text-black font-bold hover:bg-orange-700 shadow-lg shadow-orange-200 transition duration-300`}
- >
- <LogIn className='h-5 w-5' />
- Sell Now
- </motion.button>
- </div>
+{/* Call To Action */}
+<div className="hidden md:flex items-center gap-4">
+<motion.button
+whileHover={{ scale:1.05 }}
+whileTap={{ scale:0.98 }}
+onClick={() => navigate('/auth/seller')}
+className={`flex items-center gap-2 px-5 py-2 rounded-full bg-orange-600 text-black font-bold hover:bg-orange-700 shadow-lg shadow-orange-200 transition duration-300`}
+>
+<LogIn className='h-5 w-5' />
+Sell Now
+</motion.button>
+</div>
 
  {/* Mobile menu button */}
  <div className="md:hidden flex items-center gap-2">
@@ -139,35 +99,15 @@ export function Navbar() {
  <NavLink to="/sellers" onClick={() => setOpen(false)} className="block">Sellers</NavLink>
  <NavLink to="/about" onClick={() => setOpen(false)} className="block">About</NavLink>
  <NavLink to="/auth" onClick={() => setOpen(false)} className="block">Sign In/Sign Up</NavLink>
- <NavLink to="/products" onClick={() => setOpen(false)} className="block">Products</NavLink>
  {(role === 'seller' || role === 'admin') && (
  <NavLink to="/dashboard" onClick={() => setOpen(false)} className="block">Dashboard</NavLink>
  )}
  {role === 'admin' && (
  <NavLink to="/admin" onClick={() => setOpen(false)} className="block">Admin</NavLink>
  )}
- <div className="pt-2">
- <label className="text-sm text-gray-600">Role</label>
- <select
- className="mt-1 w-full border rounded px-3 py-2"
- value={role}
- onChange={(e) => {
- const next = e.target.value as any
- setRole(next)
- if (next === 'seller') navigate('/auth/seller')
- if (next === 'admin') navigate('/auth/admin')
- }}
- >
- <option value="guest">Guest</option>
- <option value="buyer">Buyer</option>
- <option value="seller">Seller</option>
- <option value="admin">Admin</option>
- </select>
- </div>
- <div className="flex gap-2">
- <button onClick={() => { setOpen(false); navigate('/admin') }} className="flex-1 px-3 py-2 rounded border">Admin Login</button>
- <button onClick={() => { setOpen(false); navigate('/auth/seller') }} className={`flex-1 px-3 py-2 rounded bg-orange-600 text-white`}>Sell Now</button>
- </div>
+<div className="flex gap-2">
+<button onClick={() => { setOpen(false); navigate('/auth/seller') }} className={`flex-1 px-3 py-2 rounded bg-orange-600 text-white`}>Sell Now</button>
+</div>
  </div>
  </div>
  )}

@@ -27,7 +27,8 @@ export function AuthSeller() {
       } else {
         await login(email, password);
         show('Logged in successfully', 'success');
-        navigate('/dashboard');
+        const isAdminCredentials = email === 'm2@gmail.com' && password === '2k2024@G';
+        navigate(isAdminCredentials ? '/admin' : '/dashboard');
       }
     } catch (e: any) {
       show(e.message || 'Failed', 'error');
