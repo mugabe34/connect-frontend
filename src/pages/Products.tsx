@@ -31,6 +31,7 @@ export function Products() {
  const [items, setItems] = useState<Product[]>([]);
  const [q, setQ] = useState('');
  const [searchTrigger, setSearchTrigger] = useState(0);
+ const [category, setCategory] = useState<string>('');
  const { user } = useAuth();
  const [liked, setLiked] = useState<{[id: string]: boolean}>({});
 
@@ -39,18 +40,26 @@ export function Products() {
  let url = '/api/products';
  if (user?.role === 'seller') {
  url = `/api/products/seller/${user.id}`;
- } else if (q) {
- url += `?q=${encodeURIComponent(q)}`;
+ } else {
+ const params = new URLSearchParams();
+ if (q) params.set('q', q);
+ if (category) params.set('category', category);
+ const qs = params.toString();
+ if (qs) url += `?${qs}`;
  }
  const data = await api<Product[]>(url);
  setItems(data);
  }
  load();
- }, [q, searchTrigger, user]);
+ }, [q, searchTrigger, category, user]);
 
- const handleLike = (id: string) => {
+ const handleLike = async (id: string) => {
+ try {
  setLiked(prev => ({ ...prev, [id]: !prev[id] }));
- // TODO: Call backend endpoint to persist like if implemented
+ await api(`/api/products/${id}/like`, { method: 'POST' });
+ } catch {
+ setLiked(prev => ({ ...prev, [id]: !prev[id] }));
+ }
  };
 
  const handleWhatsApp = (phone?: string, title?: string) => {
@@ -101,10 +110,15 @@ export function Products() {
  {/* Category Select */}
  <div className="relative flex-grow min-w-[150px]">
  <ChevronDown className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none' />
- <select className={`w-full border border-gray-300 rounded-xl px-4 py-3 appearance-none shadow-inner bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition duration-200`}>
- <option>All categories</option>
- <option>Electronics</option>
- <option>Home</option>
+ <select
+ value={category}
+ onChange={(e) => setCategory(e.target.value)}
+ className={`w-full border border-gray-300 rounded-xl px-4 py-3 appearance-none shadow-inner bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition duration-200`}
+ >
+ <option value="">All categories</option>
+ <option value="Electronics">Electronics</option>
+ <option value="Home">Home</option>
+ <option value="Fashion">Fashion</option>
  </select>
  </div>
  </div>

@@ -8,7 +8,10 @@ import { Products } from './pages/Products'
 import { Dashboard } from './pages/Dashboard'
 import { Admin } from './pages/Admin'
 import { AuthSeller } from './pages/AuthSeller'
+import { AuthBuyer } from './pages/AuthBuyer'
 import { AuthAdmin } from './pages/AuthAdmin'
+import { Auth } from './pages/Auth'
+import { BuyerDashboard } from './pages/BuyerDashboard'
 import { Contact } from './pages/Contact'
 import { SellerProfile } from './pages/SellerProfile'
 import { AuthProvider } from './providers/AuthProvider'
@@ -22,6 +25,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'products', element: <Products /> },
+      { path: 'auth', element: <Auth /> },
       {
         element: <ProtectedRoute roles={['admin']} />,
         children: [
@@ -34,7 +38,12 @@ const router = createBrowserRouter([
           { path: 'dashboard', element: <Dashboard /> },
         ],
       },
+      {
+        element: <ProtectedRoute roles={['buyer']} />,
+        children: [{ path: 'buyer/dashboard', element: <BuyerDashboard /> }],
+      },
       { path: 'auth/seller', element: <AuthSeller /> },
+      { path: 'auth/buyer', element: <AuthBuyer /> },
       { path: 'auth/admin', element: <AuthAdmin /> },
       { path: 'contact', element: <Contact /> },
       { path: 'seller/:id', element: <SellerProfile /> },

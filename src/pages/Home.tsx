@@ -20,8 +20,9 @@ import jackets from '../assets/jackets.jpg'
 import pants from '../assets/pants.jpg'
 import shoes from '../assets/shoes.jpg'
 import images from '../assets/images.jpg'
+import get_in_touch from '../assets/get_in_touch.png'
 
-const demoImages = [jackets, shoes, images, pants]
+const demoImages = [pants, jackets, shoes, images, get_in_touch]
 
 function useAnimatedCounter(to: number, duration = 2000) {
     const [count, setCount] = useState(0)
@@ -56,7 +57,6 @@ export function Home() {
         api<{ email: string; phone: string }>('/api/contact-info').then(setContactInfo)
     }, [])
 
-    // Slider state
     const [slide, setSlide] = useState(0)
     useEffect(() => {
         const timer = setInterval(() => {
@@ -121,22 +121,21 @@ export function Home() {
             />
 
             <section className="relative overflow-hidden z-10">
-                <div className="container-max py-20 grid gap-10 md:grid-cols-2 items-center">
-                    {/* VERTICAL STACKED-SWAP SLIDER */}
-                    <div className="hidden md:flex justify-center">
-                        <div className="relative w-64 lg:w-72 h-[420px]">
+                <div className="container-max py-16 md:py-20 grid gap-10 md:grid-cols-2 items-center">
+                    <div className="flex justify-center order-2 md:order-1">
+                        <div className="relative w-56 sm:w-64 lg:w-72 h-[360px] sm:h-[420px]">
                             {[0, 1, 2].map((offset) => {
                                 const index = (slide + offset) % demoImages.length
-                                const heights = [260, 160, 120]
-                                const topPositions = [0, 150, 260]
-                                const opacityLevels = [1, 0.75, 0.5]
+                                const heights = [220, 150, 110]
+                                const topPositions = [0, 130, 230]
+                                const opacityLevels = [1, 0.78, 0.6]
                                 const borderColors = ['border-sky-100', 'border-white/50', 'border-white/30']
                                 return (
                                     <motion.div
                                         key={`${slide}-${offset}`}
-                                        initial={{ opacity: 0, y: 80 }}
+                                        initial={{ opacity: 0, y: 40 }}
                                         animate={{ opacity: opacityLevels[offset], y: topPositions[offset] }}
-                                        transition={{ duration: 0.7, ease: 'easeInOut' }}
+                                        transition={{ duration: 0.6, ease: 'easeOut' }}
                                         className={`absolute left-0 w-full rounded-3xl overflow-hidden shadow-2xl bg-white/5 backdrop-blur border ${borderColors[offset]}`}
                                         style={{ height: heights[offset], zIndex: 30 - offset * 10 }}
                                     >
@@ -152,7 +151,7 @@ export function Home() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7 }}
-                        className="space-y-4"
+                        className="space-y-4 order-1 md:order-2"
                     >
                         <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
                             Buy and sell locally on <span className="text-sky-600">Connect</span>

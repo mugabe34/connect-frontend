@@ -5,6 +5,8 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  phone?: string;
+  location?: string;
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -22,6 +24,7 @@ export interface Product {
   contact: { email: string; phone?: string };
   approved: boolean;
   featured: boolean;
+  likes?: number;
   createdAt?: string;
   updatedAt?: string;
 }
