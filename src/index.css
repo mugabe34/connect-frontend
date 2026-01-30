@@ -6,6 +6,7 @@ html, body, #root {
   height: 100%;
 }
 
+<<<<<<< HEAD
 .container-max {
   @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
@@ -14,3 +15,20 @@ html, body, #root {
 * {
   @apply transition-colors duration-200;
 }
+=======
+/* Professional Font Setup */
+@layer base {
+  html {
+    @apply font-sans;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold;
+  }
+  
+  body {
+    @apply font-sans antialiased;
+  }
+}
+
+>>>>>>> a421124 (Initial commit with About page)

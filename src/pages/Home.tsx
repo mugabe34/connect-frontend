@@ -20,9 +20,19 @@ import jackets from '../assets/jackets.jpg'
 import pants from '../assets/pants.jpg'
 import shoes from '../assets/shoes.jpg'
 import images from '../assets/images.jpg'
+<<<<<<< HEAD
 import get_in_touch from '../assets/get_in_touch.png'
 
 const demoImages = [pants, jackets, shoes, images, get_in_touch]
+=======
+import nike from '../assets/nike.jpeg'
+import shirt from '../assets/shirt.jpeg'
+import photo1 from '../assets/1.png'
+import photo2 from '../assets/2.png'
+
+const demoImages = [pants, jackets, shoes, images, nike]
+const clothesSlideImages = [shirt, shoes, nike, jackets, pants]
+>>>>>>> a421124 (Initial commit with About page)
 
 function useAnimatedCounter(to: number, duration = 2000) {
     const [count, setCount] = useState(0)
@@ -43,7 +53,10 @@ function useAnimatedCounter(to: number, duration = 2000) {
 
 export function Home() {
     const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+<<<<<<< HEAD
     const [stats, setStats] = useState({ totalUsers: 0, totalProducts: 0 })
+=======
+>>>>>>> a421124 (Initial commit with About page)
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
     const [contactInfo, setContactInfo] = useState<{ email: string; phone: string } | null>(null)
 
@@ -53,7 +66,10 @@ export function Home() {
 
     useEffect(() => {
         api<Product[]>('/api/products?featured=true&limit=8').then(setFeaturedProducts)
+<<<<<<< HEAD
         api<{ totalUsers: number; totalProducts: number }>('/api/stats').then(setStats)
+=======
+>>>>>>> a421124 (Initial commit with About page)
         api<{ email: string; phone: string }>('/api/contact-info').then(setContactInfo)
     }, [])
 
@@ -107,6 +123,28 @@ export function Home() {
         }
     ]
 
+<<<<<<< HEAD
+=======
+    // Dynamically inject product image background styles
+    useEffect(() => {
+        if (featuredProducts.length > 0) {
+            featuredProducts.forEach((product) => {
+                const styleId = `product-image-style-${product.id}`
+                if (!document.getElementById(styleId)) {
+                    const style = document.createElement('style')
+                    style.id = styleId
+                    style.innerHTML = `
+                        .product-image-${product.id} {
+                            background-image: url('${product.images[0]?.url}');
+                        }
+                    `
+                    document.head.appendChild(style)
+                }
+            })
+        }
+    }, [featuredProducts])
+
+>>>>>>> a421124 (Initial commit with About page)
     return (
         <motion.div
             className="bg-gradient-to-b from-sky-50 via-white to-sky-100/20 text-gray-800 relative overflow-hidden"
@@ -139,7 +177,11 @@ export function Home() {
                                         className={`absolute left-0 w-full rounded-3xl overflow-hidden shadow-2xl bg-white/5 backdrop-blur border ${borderColors[offset]}`}
                                         style={{ height: heights[offset], zIndex: 30 - offset * 10 }}
                                     >
+<<<<<<< HEAD
                                         <img src={demoImages[index]} className="w-full h-full object-cover" />
+=======
+                                        <img src={demoImages[index]} alt="Product carousel" className="w-full h-full object-cover" />
+>>>>>>> a421124 (Initial commit with About page)
                                     </motion.div>
                                 )
                             })}
@@ -282,8 +324,12 @@ export function Home() {
             onClick={() => setSelectedProduct(product)}
         >
             <div
+<<<<<<< HEAD
                 className="h-44 bg-cover bg-center group-hover:scale-105 transition-transform duration-300"
                 style={{ backgroundImage: `url(${product.images[0]?.url})` }}
+=======
+                className={`h-44 bg-cover bg-center group-hover:scale-105 transition-transform duration-300 product-image-${product.id}`}
+>>>>>>> a421124 (Initial commit with About page)
             />
             <div className="p-5 space-y-2">
                 <div className="font-semibold text-gray-800 group-hover:text-sky-600 transition-colors">
@@ -296,6 +342,109 @@ export function Home() {
 </div>
 </section>
 
+<<<<<<< HEAD
+=======
+<section className="container-max py-20">
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="grid gap-8 md:grid-cols-2"
+    >
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="group relative overflow-hidden rounded-2xl"
+        >
+            <img
+                src={photo1}
+                alt="Collection"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+        </motion.div>
+
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="group relative overflow-hidden rounded-2xl"
+        >
+            <img
+                src={photo2}
+                alt="Collection"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+        </motion.div>
+    </motion.div>
+</section>
+
+<section className="bg-gradient-to-r from-sky-50 to-blue-50 py-20">
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="container-max space-y-12"
+    >
+        <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold text-gray-900">Featured Clothing & Accessories</h2>
+            <p className="text-gray-600 text-lg">Latest trends in style and comfort</p>
+        </div>
+
+        <div className="relative">
+            <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+                {clothesSlideImages.map((image, index) => {
+                    const labels = ['Premium Shirts', 'Quality Footwear', 'Brand Sneakers', 'Designer Jackets', 'Comfortable Pants']
+                    const descriptions = [
+                        'High-quality cotton and premium fabric shirts for every occasion',
+                        'Comfortable and stylish shoes for casual and formal wear',
+                        'Authentic Nike and brand footwear with latest designs',
+                        'Trendy jackets perfect for layering and style',
+                        'Durable and comfortable pants for everyday wear'
+                    ]
+                    return (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6, delay: index * 0.1 }}
+                            className="min-w-[300px] bg-white rounded-xl shadow-md hover:shadow-xl transition-all group overflow-hidden"
+                        >
+                            <div className="relative h-64 overflow-hidden">
+                                <img
+                                    src={image}
+                                    alt={labels[index]}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <div className="absolute top-0 right-0 bg-sky-600 text-white px-4 py-2 rounded-bl-lg text-sm font-semibold">
+                                    Popular
+                                </div>
+                            </div>
+                            <div className="p-5 space-y-3">
+                                <h3 className="font-bold text-lg text-gray-900 group-hover:text-sky-600 transition">
+                                    {labels[index]}
+                                </h3>
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    {descriptions[index]}
+                                </p>
+                                <button className="w-full mt-4 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors">
+                                    Shop Now
+                                </button>
+                            </div>
+                        </motion.div>
+                    )
+                })}
+            </div>
+        </div>
+    </motion.div>
+</section>
+
+>>>>>>> a421124 (Initial commit with About page)
 {selectedProduct && (
 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
     <motion.div
@@ -306,16 +455,31 @@ export function Home() {
         <button
             className="absolute top-3 right-3 p-1 rounded-full bg-gray-100 hover:bg-gray-200"
             onClick={() => setSelectedProduct(null)}
+<<<<<<< HEAD
+=======
+            title="Close product details"
+            aria-label="Close product details"
+>>>>>>> a421124 (Initial commit with About page)
         >
             <X className="h-5 w-5 text-gray-600" />
         </button>
         <img
+<<<<<<< HEAD
             src={selectedProduct.images[0]?.url}
             className="rounded-lg mb-4 w-full h-56 object-cover"
         />
         <h3 className="text-xl font-bold text-gray-800 mb-2">{selectedProduct.title}</h3>
         <p className="text-gray-600 mb-2">{selectedProduct.description}</p>
         <div className="text-sky-600 font-bold text-lg">${selectedProduct.price}</div>
+=======
+            src={selectedProduct?.images[0]?.url}
+            alt={selectedProduct?.title || 'Product image'}
+            className="rounded-lg mb-4 w-full h-56 object-cover"
+        />
+        <h3 className="text-xl font-bold text-gray-800 mb-2">{selectedProduct?.title}</h3>
+        <p className="text-gray-600 mb-2">{selectedProduct?.description}</p>
+        <div className="text-sky-600 font-bold text-lg">${selectedProduct?.price}</div>
+>>>>>>> a421124 (Initial commit with About page)
     </motion.div>
 </div>
 )}
@@ -370,7 +534,11 @@ export function Home() {
                                 </button>
                             </form>
                             <div className="text-sm text-gray-600 text-center md:text-left">
+<<<<<<< HEAD
                                 {contactInfo && `📞 ${contactInfo.phone} · ✉️ ${contactInfo.email}`}
+=======
+                                {contactInfo && `📞 ${contactInfo?.phone} · ✉️ ${contactInfo?.email}`}
+>>>>>>> a421124 (Initial commit with About page)
                             </div>
                         </motion.div>
                         <motion.div
@@ -386,7 +554,11 @@ export function Home() {
                             <div className="absolute -bottom-8 right-8 w-16 h-16 rounded-3xl bg-sky-100 blur-xl" />
                             <div className="rounded-[28px] bg-gradient-to-br from-sky-50 via-white to-sky-100 border border-sky-100 shadow-lg p-6">
                                 <div className="relative overflow-hidden rounded-2xl">
+<<<<<<< HEAD
                                     <img src={images} className="w-full h-64 object-cover rounded-2xl" />
+=======
+                                    <img src={images} alt="Contact support" className="w-full h-64 object-cover rounded-2xl" />
+>>>>>>> a421124 (Initial commit with About page)
                                     <motion.span
                                         className="absolute inset-0 bg-gradient-to-t from-sky-900/40 to-transparent"
                                         initial={{ opacity: 0 }}
