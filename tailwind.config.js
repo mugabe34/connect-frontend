@@ -12,13 +12,6 @@ export default {
           dark: '#0284c7',
         },
       },
-<<<<<<< HEAD
-=======
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        display: ['Poppins', 'sans-serif'],
-      },
->>>>>>> a421124 (Initial commit with About page)
     },
   },
   plugins: [],

@@ -135,7 +135,7 @@ export function Home() {
                                         animate={{ opacity: opacityLevels[offset], y: topPositions[offset] }}
                                         transition={{ duration: 0.6, ease: 'easeOut' }}
                                         className={`absolute left-0 w-full rounded-3xl overflow-hidden shadow-2xl bg-white/5 backdrop-blur border ${borderColors[offset]}`}
-                                        style={{ height: heights[offset], zIndex: 30 - offset * 10 }}
+                                        style={{ height: heights[offset], zIndex: 30 - offset * 10 } as React.CSSProperties}
                                     >
                                         <img src={demoImages[index]} alt="Product carousel slide" className="w-full h-full object-cover" />
                                     </motion.div>
@@ -281,8 +281,9 @@ export function Home() {
         >
             <div
                 className="h-44 bg-cover bg-center group-hover:scale-105 transition-transform duration-300"
+                role="img"
                 aria-label={`Product image for ${product.title}`}
-                style={{ backgroundImage: `url('${product.images[0]?.url}')` }}
+                style={{ backgroundImage: `url('${product.images[0]?.url}')` } as React.CSSProperties}
             />
             <div className="p-5 space-y-2">
                 <div className="font-semibold text-gray-800 group-hover:text-sky-600 transition-colors">
