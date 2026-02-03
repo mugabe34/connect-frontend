@@ -41,16 +41,9 @@ export function Footer() {
         <div>
           <div className="font-semibold mb-2">Company</div>
           <ul className="space-y-1">
-<<<<<<< HEAD
-            <li><Link to="/contact" className="hover:underline">Contact</Link></li>
-            <li><a href="https://x.com" target="_blank" className="hover:underline" rel="noreferrer">X</a></li>
-            <li><a href="https://github.com" target="_blank" className="hover:underline" rel="noreferrer">GitHub</a></li>
-=======
-            <li><Link to="/about" className="hover:underline">About</Link></li>
             <li><Link to="/contact" className="hover:underline">Contact</Link></li>
             <li><a href="https://x.com" target="_blank" className="hover:underline" rel="noopener noreferrer">X</a></li>
             <li><a href="https://github.com" target="_blank" className="hover:underline" rel="noopener noreferrer">GitHub</a></li>
->>>>>>> a421124 (Initial commit with About page)
           </ul>
         </div>
         <div>

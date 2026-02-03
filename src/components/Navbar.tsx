@@ -5,7 +5,6 @@ import { useState } from 'react'
 import conlogo from '../assets/conlogo.png'
 import {
   Home,
-  LayoutDashboard,
   LockKeyhole,
   Users,
   Info,
@@ -42,13 +41,9 @@ export function Navbar() {
           <NavLink to="/contact" className={getNavLinkClass}>
             <PhoneCall className="h-4 w-4" /> Contact Us
           </NavLink>
-<<<<<<< HEAD
           <NavLink to="/sellers" className={getNavLinkClass}>
             <Users className="h-4 w-4" /> Sellers
           </NavLink>
-=======
-         
->>>>>>> a421124 (Initial commit with About page)
           <NavLink to="/about" className={getNavLinkClass}>
             <Info className="h-4 w-4" /> About
           </NavLink>
@@ -57,11 +52,7 @@ export function Navbar() {
           </NavLink>
           {role === 'admin' && (
             <NavLink to="/admin" className={getNavLinkClass}>
-<<<<<<< HEAD
               <LockKeyhole className="h-4 w-4" /> Admin Panel
-=======
-              <LockKeyhole className="h-4 w-4 " /> Admin Panel
->>>>>>> a421124 (Initial commit with About page)
             </NavLink>
           )}
         </div>
