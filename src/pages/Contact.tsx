@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, PhoneCall, MapPin } from 'lucide-react'
+import {
+  Mail,
+  PhoneCall,
+  MapPin,
+  ShoppingBag,
+  ShieldCheck,
+  Users,
+  HelpCircle
+} from 'lucide-react'
 import { useToast } from '../components/Toast'
 import get_in_touch from '../assets/get_in_touch.png'
 
@@ -12,7 +20,9 @@ export function Contact() {
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name || !email || !message) return show('Please fill all fields', 'error')
+    if (!name || !email || !message) {
+      return show('Please fill all fields', 'error')
+    }
     show('Message sent (stub)', 'success')
     setName('')
     setEmail('')
@@ -21,136 +31,181 @@ export function Contact() {
 
   return (
     <motion.div
-      className="relative bg-gradient-to-b from-sky-50 via-white to-sky-100/30"
+      className="bg-white"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.6 }}
     >
-      <motion.div
-        className="pointer-events-none absolute -left-24 top-24 h-56 w-56 rounded-full bg-sky-200/50 blur-3xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
-      />
-      <motion.div
-        className="pointer-events-none absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-sky-300/40 blur-3xl"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
-      />
-      <div className="relative container-max min-h-[70vh] py-12 flex items-center">
-        <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[1.1fr_0.9fr] items-center">
+      {/* =======================
+          PAGE HEADER
+      ======================= */}
+      <section className="pt-20 pb-16">
+        <div className="container mx-auto px-6 max-w-5xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">
+            Contact
+          </p>
+          <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900">
+            Ask how we can help you
+          </h1>
+          <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+            Whether you’re buying, selling, or need support, our team is ready
+            to guide you.
+          </p>
+        </div>
+      </section>
+
+      {/* =======================
+          HELP OPTIONS (NO RADIUS)
+      ======================= */}
+      <section className="pb-20">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <HelpBlock
+              icon={ShoppingBag}
+              title="Buying Products"
+              text="Questions about products, pricing, or placing orders."
+            />
+            <HelpBlock
+              icon={Users}
+              title="Selling on Connect"
+              text="Get help setting up, managing, or growing your store."
+            />
+            <HelpBlock
+              icon={ShieldCheck}
+              title="Trust & Safety"
+              text="Learn how we protect buyers and sellers on the platform."
+            />
+            <HelpBlock
+              icon={HelpCircle}
+              title="General Support"
+              text="Any other questions? We’re happy to help."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* =======================
+          CONTACT FORM SECTION
+      ======================= */}
+      <section className="pb-24">
+        <div className="container mx-auto px-6 max-w-6xl grid gap-12 lg:grid-cols-2 items-start">
+
+          {/* FORM */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="bg-white/90 backdrop-blur-xl border border-sky-100 rounded-3xl shadow-2xl px-6 py-8 sm:px-8 sm:py-10"
+            transition={{ duration: 0.6 }}
+            className="border border-gray-200 bg-white shadow-lg px-6 py-8 sm:px-10 sm:py-10"
           >
-            <div className="mb-6 space-y-2 text-center sm:text-left">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">Contact</p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">We would love to hear from you</h1>
-              <p className="text-sm text-gray-600">
-                Share your questions, feedback, or ideas and our team will get back to you shortly.
-              </p>
-            </div>
-            <form onSubmit={submit} className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Contact our team
+            </h2>
+            <p className="text-sm text-gray-600 mb-6">
+              Fill in the form and we’ll get back to you as soon as possible.
+            </p>
+
+            <form onSubmit={submit} className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Name</label>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Name
+                  </label>
                   <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"
+                    className="w-full border border-gray-300 px-4 py-3 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"
                     placeholder="Your full name"
-                    required
                   />
                 </div>
+
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Email</label>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Email
+                  </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"
+                    className="w-full border border-gray-300 px-4 py-3 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"
                     placeholder="you@example.com"
-                    required
                   />
                 </div>
               </div>
+
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Message</label>
+                <label className="block mb-1 text-sm font-medium text-gray-700">
+                  Message
+                </label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full min-h-[140px] rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"
-                  placeholder="Tell us how we can help"
-                  required
+                  className="w-full min-h-[160px] border border-gray-300 px-4 py-3 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"
+                  placeholder="Tell us how we can help you..."
                 />
               </div>
+
               <button
                 type="submit"
-                className="mt-2 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700"
+                className="w-full bg-sky-600 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-700 transition"
               >
-                Send message
+                Send Message
               </button>
             </form>
-            <div className="mt-6 grid gap-3 text-xs text-gray-600 sm:grid-cols-3">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-sky-500" />
-                <span>support@connect.local</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <PhoneCall className="h-4 w-4 text-sky-500" />
-                <span>+250 781 908 314</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-sky-500" />
-                <span>Kigali, Rwanda</span>
-              </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-3 text-sm text-gray-600">
+              <Info icon={Mail} text="mugabeherve7@gmail.com" />
+              <Info icon={PhoneCall} text="+250 781 908 314" />
+              <Info icon={MapPin} text="Kigali, Rwanda" />
             </div>
           </motion.div>
+
+          {/* IMAGE / PROCESS */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.05 }}
-            className="relative"
+            transition={{ duration: 0.6, delay: 0.05 }}
+            className="hidden lg:block"
           >
-            <div className="absolute -top-6 left-4 h-10 w-10 rounded-full border border-sky-200 bg-white/80 shadow-md" />
-            <div className="absolute -bottom-10 right-0 h-20 w-20 rounded-3xl bg-sky-200/50 blur-xl" />
-            <div className="relative rounded-[28px] border border-sky-100 bg-gradient-to-br from-sky-50 via-white to-sky-100 p-5 shadow-xl">
-              <div className="relative overflow-hidden rounded-2xl">
-                <img src={get_in_touch} className="h-64 w-full object-cover" />
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-t from-sky-900/45 to-transparent"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6, ease: 'easeOut' }}
-                />
-              </div>
-              <div className="mt-5 space-y-3 text-sm text-gray-700">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-100 text-xs font-semibold text-sky-600">
-                    1
-                  </span>
-                  <span>Share your request in a few lines.</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-100 text-xs font-semibold text-sky-600">
-                    2
-                  </span>
-                  <span>We connect you with the right team member.</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-100 text-xs font-semibold text-sky-600">
-                    3
-                  </span>
-                  <span>Move your buying or selling journey forward.</span>
-                </div>
-              </div>
-            </div>
+            <img
+              src={get_in_touch}
+              alt="Get in touch"
+              className="h-full w-full object-cover border border-gray-200"
+            />
           </motion.div>
+
         </div>
-      </div>
+      </section>
     </motion.div>
+  )
+}
+
+/* =======================
+   SMALL COMPONENTS
+======================= */
+
+function HelpBlock({
+  icon: Icon,
+  title,
+  text
+}: {
+  icon: any
+  title: string
+  text: string
+}) {
+  return (
+    <div className="border border-gray-200 p-6 bg-gray-50">
+      <Icon className="h-6 w-6 text-sky-600 mb-4" />
+      <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
+      <p className="text-sm text-gray-600">{text}</p>
+    </div>
+  )
+}
+
+function Info({ icon: Icon, text }: { icon: any; text: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-sky-500" />
+      <span>{text}</span>
+    </div>
   )
 }

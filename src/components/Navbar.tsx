@@ -6,7 +6,6 @@ import conlogo from '../assets/conlogo.png'
 import {
   Home,
   LockKeyhole,
-  Users,
   Info,
   PhoneCall,
   UserPlus,
@@ -41,9 +40,7 @@ export function Navbar() {
           <NavLink to="/contact" className={getNavLinkClass}>
             <PhoneCall className="h-4 w-4" /> Contact Us
           </NavLink>
-          <NavLink to="/sellers" className={getNavLinkClass}>
-            <Users className="h-4 w-4" /> Sellers
-          </NavLink>
+          
           <NavLink to="/about" className={getNavLinkClass}>
             <Info className="h-4 w-4" /> About
           </NavLink>
@@ -104,9 +101,7 @@ export function Navbar() {
             <NavLink to="/contact" onClick={() => setOpen(false)} className="block">
               Contact Us
             </NavLink>
-            <NavLink to="/sellers" onClick={() => setOpen(false)} className="block">
-              Sellers
-            </NavLink>
+           
             <NavLink to="/about" onClick={() => setOpen(false)} className="block">
               About
             </NavLink>

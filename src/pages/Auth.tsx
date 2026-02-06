@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Store, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Store, ArrowRight, LockKeyhole } from 'lucide-react';
 
 export function Auth() {
   const navigate = useNavigate();
@@ -71,6 +71,33 @@ export function Auth() {
                 <span>Requires phone number for WhatsApp contact and product uploads.</span>
                 <span className="inline-flex items-center gap-1 text-sky-600 font-semibold">
                   Continue
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </div>
+            </motion.button>
+
+            <motion.button
+              type="button"
+              onClick={() => navigate('/auth/admin')}
+              whileHover={{ y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              className="group text-left rounded-3xl border border-emerald-300 bg-gradient-to-br from-emerald-50 to-emerald-100 px-6 py-7 shadow-sm hover:shadow-xl hover:border-emerald-500 transition flex flex-col justify-between gap-4 md:col-span-2"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center">
+                  <LockKeyhole className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">Admin Console</h2>
+                  <p className="text-xs text-slate-600">
+                    Restricted access: Manage users, products, and platform settings.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-600">
+                <span>Administrator credentials required for access.</span>
+                <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                  Enter Console
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </div>

@@ -11,10 +11,45 @@ export function AuthSeller() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [location, setLocation] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showGoogleLocationModal, setShowGoogleLocationModal] = useState(false);
   const { show } = useToast();
-  const { login, register, loginWithGoogle } = useAuth();
+  const { login, register, loginWithGoogleSSO } = useAuth();
   const navigate = useNavigate();
+
+  // Handle Google Sign-In flow for sellers (requires location selection)
+  const handleGoogleSignIn = async () => {
+    try {
+      // For sellers, we need location. For login mode, use direct login
+      if (mode === 'login') {
+        await loginWithGoogleSSO(null, 'seller');
+        show('Logged in successfully', 'success');
+        navigate('/dashboard');
+      } else {
+        // For register mode, show location selection modal first
+        setShowGoogleLocationModal(true);
+      }
+    } catch (err: any) {
+      show(err.message || 'Google sign-in failed', 'error');
+    }
+  };
+
+  // Complete Google registration with location
+  const completeGoogleRegistration = async (selectedLocation: string) => {
+    if (!selectedLocation.trim()) {
+      show('Please select your district', 'error');
+      return;
+    }
+    try {
+      await loginWithGoogleSSO(selectedLocation, 'seller');
+      show('Registered and logged in successfully', 'success');
+      setShowGoogleLocationModal(false);
+      navigate('/dashboard');
+    } catch (err: any) {
+      show(err.message || 'Registration failed', 'error');
+    }
+  };
 
   // NOTE: Logic remains unchanged
   async function submit(e: React.FormEvent) {
@@ -29,7 +64,11 @@ export function AuthSeller() {
           show('Phone number is required for sellers', 'error');
           return;
         }
-        await register(name, email, password, 'seller', { phone });
+        if (!location.trim()) {
+          show('Please select your district', 'error');
+          return;
+        }
+        await register(name, email, password, 'seller', { phone, location });
         show('Registered successfully', 'success');
         setMode('login');
       } else {
@@ -100,6 +139,62 @@ export function AuthSeller() {
                 />
               </motion.div>
             )}
+
+              {/* Location (district) select for Rwanda */}
+              {mode === 'register' && (
+                <div>
+                  <label htmlFor="location-select" className="block text-sm font-semibold mb-2 text-slate-700">District (Rwanda)</label>
+                  <select
+                    id="location-select"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-4 py-2.5 shadow-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-100 transition duration-200"
+                    required
+                  >
+                    <option value="">Select your district</option>
+                    <optgroup label="Kigali City">
+                      <option>Gasabo</option>
+                      <option>Kicukiro</option>
+                      <option>Nyarugenge</option>
+                    </optgroup>
+                    <optgroup label="Eastern Province">
+                      <option>Bugesera</option>
+                      <option>Gatsibo</option>
+                      <option>Kayonza</option>
+                      <option>Kirehe</option>
+                      <option>Ngoma</option>
+                      <option>Nyagatare</option>
+                      <option>Rwamagana</option>
+                    </optgroup>
+                    <optgroup label="Northern Province">
+                      <option>Burera</option>
+                      <option>Gakenke</option>
+                      <option>Gicumbi</option>
+                      <option>Musanze</option>
+                      <option>Rulindo</option>
+                    </optgroup>
+                    <optgroup label="Southern Province">
+                      <option>Gisagara</option>
+                      <option>Huye</option>
+                      <option>Kamonyi</option>
+                      <option>Muhanga</option>
+                      <option>Nyamagabe</option>
+                      <option>Nyanza</option>
+                      <option>Nyaruguru</option>
+                      <option>Ruhango</option>
+                    </optgroup>
+                    <optgroup label="Western Province">
+                      <option>Karongi</option>
+                      <option>Ngororero</option>
+                      <option>Nyabihu</option>
+                      <option>Nyamasheke</option>
+                      <option>Rubavu</option>
+                      <option>Rusizi</option>
+                      <option>Rutsiro</option>
+                    </optgroup>
+                  </select>
+                </div>
+              )}
 
             {/* Phone Field (Register Mode) */}
             {mode === 'register' && (
@@ -196,7 +291,7 @@ export function AuthSeller() {
 
             <motion.button
               type="button"
-              onClick={loginWithGoogle}
+              onClick={handleGoogleSignIn}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm font-medium hover:bg-slate-50 hover:border-sky-300 shadow-sm"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.99 }}
@@ -212,6 +307,90 @@ export function AuthSeller() {
             </p>
           </form>
         </motion.div>
+
+        {/* Google Location Modal */}
+        {showGoogleLocationModal && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-3xl p-8 shadow-2xl max-w-md w-full mx-4"
+            >
+              <h2 className="text-2xl font-semibold text-slate-900 mb-2">
+                Select Your District
+              </h2>
+              <p className="text-sm text-slate-600 mb-6">
+                Help buyers find you by selecting where you operate.
+              </p>
+              <select
+                id="google-location-select"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 mb-6 shadow-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-100"
+                aria-label="Select your district"
+              >
+                <option value="">Select your district</option>
+                <optgroup label="Kigali City">
+                  <option>Gasabo</option>
+                  <option>Kicukiro</option>
+                  <option>Nyarugenge</option>
+                </optgroup>
+                <optgroup label="Eastern Province">
+                  <option>Bugesera</option>
+                  <option>Gatsibo</option>
+                  <option>Kayonza</option>
+                  <option>Kirehe</option>
+                  <option>Ngoma</option>
+                  <option>Nyagatare</option>
+                  <option>Rwamagana</option>
+                </optgroup>
+                <optgroup label="Northern Province">
+                  <option>Burera</option>
+                  <option>Gakenke</option>
+                  <option>Gicumbi</option>
+                  <option>Musanze</option>
+                  <option>Rulindo</option>
+                </optgroup>
+                <optgroup label="Southern Province">
+                  <option>Gisagara</option>
+                  <option>Huye</option>
+                  <option>Kamonyi</option>
+                  <option>Muhanga</option>
+                  <option>Nyamagabe</option>
+                  <option>Nyanza</option>
+                  <option>Nyaruguru</option>
+                  <option>Ruhango</option>
+                </optgroup>
+                <optgroup label="Western Province">
+                  <option>Karongi</option>
+                  <option>Ngororero</option>
+                  <option>Nyabihu</option>
+                  <option>Nyamasheke</option>
+                  <option>Rubavu</option>
+                  <option>Rusizi</option>
+                  <option>Rutsiro</option>
+                </optgroup>
+              </select>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowGoogleLocationModal(false);
+                    setLocation('');
+                  }}
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-medium hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => completeGoogleRegistration(location)}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-sky-600 text-white font-medium hover:bg-sky-700"
+                >
+                  Continue
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     </div>
   );
