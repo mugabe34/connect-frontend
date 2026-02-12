@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { api } from '../lib/api'
+import { api, getImageUrl } from '../lib/api'
 import type { Product } from '../types'
 import {
     Users,
@@ -231,7 +231,7 @@ export function Home() {
                             className="min-w-[260px] bg-white border rounded-xl shadow-lg cursor-pointer"
                             whileHover={{ y: -6 }}
                             onClick={() => setSelectedProduct(product)}
-                            style={{ backgroundImage: `url('${product.images[0]?.url}')` } as React.CSSProperties}
+                            style={{ backgroundImage: `url('${getImageUrl(product.images[0]?.url)}')` } as React.CSSProperties}
                         >
                             {/* Product image background */}
                             <div
@@ -258,7 +258,7 @@ export function Home() {
                             <X />
                         </button>
                         <img
-                            src={selectedProduct.images[0]?.url}
+                            src={getImageUrl(selectedProduct.images[0]?.url)}
                             alt={selectedProduct.title}
                             className="h-56 w-full object-cover rounded-lg mb-4"
                         />

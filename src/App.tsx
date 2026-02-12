@@ -7,7 +7,9 @@ import { ToastProvider } from './components/Toast'
 function App() {
   const location = useLocation()
   const hideChrome =
-    location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/buyer/dashboard')
+    location.pathname.startsWith('/dashboard') ||
+    location.pathname.startsWith('/buyer/dashboard') ||
+    location.pathname.startsWith('/admin')
 
   return (
     <ToastProvider>

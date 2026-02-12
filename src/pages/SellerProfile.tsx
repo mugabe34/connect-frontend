@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { api } from '../lib/api'
+import { api, getImageUrl } from '../lib/api'
 import type { Product, User } from '../types'
 
 export function SellerProfile() {
@@ -24,7 +24,7 @@ export function SellerProfile() {
  {seller && (
  <div className="bg-white border rounded-lg p-6 shadow-sm">
  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
- <img src={(seller as any).avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(seller.name)}`} alt={seller.name} className="w-24 h-24 rounded-full object-cover" />
+ <img src={(seller as any).avatarUrl ? getImageUrl((seller as any).avatarUrl) : `https://ui-avatars.com/api/?name=${encodeURIComponent(seller.name)}`} alt={seller.name} className="w-24 h-24 rounded-full object-cover" />
  <div className="flex-1">
  <div className="flex items-center gap-3 flex-wrap">
  <h1 className="text-2xl font-semibold">{seller.name}</h1>
@@ -48,7 +48,7 @@ export function SellerProfile() {
  {products.map((p) => (
  <motion.div key={p.id} className="border rounded-lg overflow-hidden bg-white shadow-sm" whileInView={{ opacity: [0,1], y: [8,0] }} viewport={{ once: true }}>
  {p.images?.[0]?.url ? (
- <img src={p.images[0].url} alt={p.title} className="h-40 w-full object-cover" />
+ <img src={getImageUrl(p.images[0].url)} alt={p.title} className="h-40 w-full object-cover" />
  ) : (
  <div className="h-40 bg-gray-100" />
  )}

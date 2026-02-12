@@ -8,6 +8,7 @@ export interface User {
   phone?: string;
   location?: string;
   isActive?: boolean;
+  productCount?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -22,6 +23,7 @@ export interface Product {
   tags?: string[];
   seller: User;
   contact: { email: string; phone?: string };
+   location?: string;
   approved: boolean;
   featured: boolean;
   likes?: number;
@@ -30,15 +32,14 @@ export interface Product {
 }
 
 export interface Message {
-  _id: string;
-  from: string;
-  to: string;
-  content: string;
+  id: string;
+  subject?: string;
+  body: string;
+  sender?: { id: string; name: string; email: string; role?: UserRole };
+  recipient?: string;
   createdAt: string;
   read?: boolean;
+  fromAdmin?: boolean;
 }
-
-
-
 
 

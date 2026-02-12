@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { api } from '../lib/api';
+import { api, getImageUrl } from '../lib/api';
 import { useAuth } from '../providers/AuthProvider';
 import { useToast } from '../components/Toast';
 import { NotificationSidebar } from '../components/NotificationSidebar';
 import { ConfirmDialog } from '../components/ConfirmDialog';
-import type { Product } from '../types';
+import type { Product, Message } from '../types';
 import conlogo from '../assets/conlogo.png';
 import {
   UploadCloud,
@@ -33,6 +33,7 @@ export function SellerDashboard() {
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<FileList | null>(null);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [myProducts, setMyProducts] = useState<Product[]>([]);
   const [activeTab, setActiveTab] = useState<SellerTab>('overview');
   const [summary, setSummary] = useState<{
@@ -42,6 +43,7 @@ export function SellerDashboard() {
     pendingProducts: number;
     topLiked: Product[];
   } | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -52,6 +54,13 @@ export function SellerDashboard() {
     onConfirm: () => void | Promise<void>;
     isLoading?: boolean;
   }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+  const [profileConfirmOpen, setProfileConfirmOpen] = useState(false);
+  const [passwordConfirmOpen, setPasswordConfirmOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [bio, setBio] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   
   const { user, logout } = useAuth();
   const { show } = useToast();
@@ -63,6 +72,16 @@ export function SellerDashboard() {
       const products = await api<Product[]>(`/api/products/seller/${user.id}`);
       setMyProducts(products);
     } catch (err) { console.error('Failed to fetch products', err); }
+  }
+
+  async function fetchMessages() {
+    try {
+      const data = await api<Message[]>('/api/messages/me');
+      setMessages(data);
+    } catch (err: any) {
+      console.error('Failed to load messages', err);
+      show(err.message || 'Failed to load messages', 'error');
+    }
   }
 
   useEffect(() => {
@@ -79,6 +98,12 @@ export function SellerDashboard() {
       } catch (err) { console.error('Failed to load summary', err); }
     }
     loadSummary();
+    if (user) {
+      setName(user.name);
+      setBio((user as any).bio || '');
+      setAvatarUrl((user as any).avatarUrl || '');
+    }
+    fetchMessages();
   }, [user]);
 
   // Logic: Upload product
@@ -86,10 +111,6 @@ export function SellerDashboard() {
     e.preventDefault();
     if (!title || !price || !category) {
       show('Please fill in all required fields', 'error');
-      return;
-    }
-    if (!images || images.length === 0) {
-      show('Please upload at least one product image', 'error');
       return;
     }
 
@@ -102,17 +123,28 @@ export function SellerDashboard() {
         formData.append('contactEmail', user.email);
         if (user.phone) formData.append('contactPhone', user.phone);
     }
-    if (images) {
+    if (images && images.length > 0) {
+      const imageField = editingProductId ? 'newImages' : 'images';
       for (let i = 0; i < images.length; i++) {
-        formData.append('images', images[i]);
+        formData.append(imageField, images[i]);
       }
     }
 
     try {
       setIsUploading(true);
-      await api('/api/products', { method: 'POST', body: formData });
-      show('Product published successfully!', 'success');
-      setTitle(''); setPrice(''); setCategory(''); setDescription(''); setImages(null);
+      if (editingProductId) {
+        await api(`/api/products/${editingProductId}`, { method: 'PUT', body: formData });
+        show('Product updated successfully!', 'success');
+      } else {
+        if (!images || images.length === 0) {
+          show('Please upload at least one product image', 'error');
+          setIsUploading(false);
+          return;
+        }
+        await api('/api/products', { method: 'POST', body: formData });
+        show('Product published successfully!', 'success');
+      }
+      setTitle(''); setPrice(''); setCategory(''); setDescription(''); setImages(null); setEditingProductId(null);
       setImagePreviews([]);
       setActiveTab('products');
       fetchMyProducts();
@@ -187,7 +219,48 @@ export function SellerDashboard() {
     });
   };
 
-  const sellerAvatar = (user as any)?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'S')}&background=0f172a&color=fff`;
+  const handleProfileSave = async () => {
+    try {
+      await api('/api/auth/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ name, bio, avatarUrl }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      show('Profile updated successfully', 'success');
+      setProfileConfirmOpen(false);
+    } catch (err: any) {
+      show(err.message || 'Could not update profile. Please try again.', 'error');
+      setProfileConfirmOpen(false);
+    }
+  };
+
+  const startEditProduct = (product: Product) => {
+    setEditingProductId(product.id);
+    setTitle(product.title);
+    setPrice(String(product.price));
+    setCategory(product.category || '');
+    setDescription(product.description || '');
+    setImagePreviews(product.images?.map((img) => getImageUrl(img.url)) || []);
+    setActiveTab('upload');
+  };
+
+  const handlePasswordChange = async () => {
+    try {
+      await api('/api/auth/me/password', {
+        method: 'PATCH',
+        body: JSON.stringify({ oldPassword, newPassword }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      show('Password updated successfully', 'success');
+      setOldPassword(''); setNewPassword('');
+      setPasswordConfirmOpen(false);
+    } catch (err: any) {
+      show(err.message || 'Could not update password. Please try again.', 'error');
+      setPasswordConfirmOpen(false);
+    }
+  };
+
+  const sellerAvatar = getImageUrl(avatarUrl || (user as any)?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'S')}&background=0f172a&color=fff`);
 
   return (
     <div className="min-h-screen flex bg-slate-100 text-slate-900 font-sans">
@@ -201,6 +274,26 @@ export function SellerDashboard() {
         onConfirm={confirmDialog.onConfirm}
         onCancel={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
         isLoading={confirmDialog.isLoading}
+      />
+      <ConfirmDialog
+        isOpen={profileConfirmOpen}
+        title="Save Profile"
+        message="Do you want to save your profile changes?"
+        confirmText="Save"
+        cancelText="Cancel"
+        type="info"
+        onConfirm={handleProfileSave}
+        onCancel={() => setProfileConfirmOpen(false)}
+      />
+      <ConfirmDialog
+        isOpen={passwordConfirmOpen}
+        title="Change Password"
+        message="Confirm updating your password now?"
+        confirmText="Update"
+        cancelText="Cancel"
+        type="warning"
+        onConfirm={handlePasswordChange}
+        onCancel={() => setPasswordConfirmOpen(false)}
       />
       
       <NotificationSidebar />
@@ -292,7 +385,7 @@ export function SellerDashboard() {
                               {summary.topLiked.map((p) => (
                                   <div key={p.id} className="flex items-center gap-4 p-3 rounded hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
                                       <div className="h-12 w-12 rounded bg-slate-100 overflow-hidden shrink-0">
-                                          {p.images?.[0] && <img src={p.images[0].url} className="h-full w-full object-cover" alt="" />}
+                                          {p.images?.[0] && <img src={getImageUrl(p.images[0].url)} className="h-full w-full object-cover" alt="" />}
                                       </div>
                                       <div className="flex-1 min-w-0">
                                           <p className="font-bold text-slate-900 text-sm truncate">{p.title}</p>
@@ -322,6 +415,60 @@ export function SellerDashboard() {
                         </button>
                     </div>
                 </div>
+
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <div className="bg-white border border-slate-200 rounded shadow-sm p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-slate-900">Messages from Admin</h3>
+                      <button
+                        onClick={fetchMessages}
+                        className="text-xs font-semibold text-slate-600 hover:text-slate-900"
+                      >
+                        Refresh
+                      </button>
+                    </div>
+                    {messages.length === 0 ? (
+                      <p className="text-sm text-slate-500">No messages yet.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {messages.map((m) => (
+                          <div key={m.id} className={`p-4 rounded border ${m.read ? 'border-slate-200 bg-slate-50' : 'border-blue-200 bg-blue-50/60'}`}>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-semibold text-slate-900">{m.subject || 'Message'}</p>
+                                <p className="text-sm text-slate-700 mt-1">{m.body}</p>
+                                <p className="text-[11px] text-slate-500 mt-2">{new Date(m.createdAt).toLocaleString()}</p>
+                              </div>
+                              {!m.read && (
+                                <button
+                                  className="text-xs text-blue-600 font-semibold"
+                                  onClick={async () => {
+                                    await api(`/api/messages/${m.id}/read`, { method: 'POST' });
+                                    setMessages(prev => prev.map(msg => msg.id === m.id ? { ...msg, read: true } : msg));
+                                  }}
+                                >
+                                  Mark read
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-white border border-slate-200 rounded shadow-sm p-6">
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">Profile Quick View</h3>
+                    <div className="flex items-center gap-4">
+                      <img src={sellerAvatar} className="h-16 w-16 rounded-full border" alt="avatar"/>
+                      <div>
+                        <p className="font-bold text-slate-900">{name}</p>
+                        <p className="text-sm text-slate-600">{bio || 'No bio yet'}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => setActiveTab('profile')} className="mt-4 text-sm font-semibold text-blue-600">Edit profile</button>
+                  </div>
+                </div>
               </motion.div>
             )}
 
@@ -350,7 +497,7 @@ export function SellerDashboard() {
                         <div key={product.id} className="group bg-white rounded border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-300">
                         <div className="relative h-48 overflow-hidden bg-slate-100">
                             {product.images?.[0] ? (
-                                <img src={product.images[0].url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={product.title} />
+                                <img src={getImageUrl(product.images[0].url)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={product.title} />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300"><PackageSearch size={32}/></div>
                             )}
@@ -371,7 +518,7 @@ export function SellerDashboard() {
                             <p className="text-slate-500 text-xs line-clamp-2 mb-4 h-8">{product.description}</p>
                             
                             <div className="flex gap-2">
-                                <button onClick={() => setActiveTab('upload')} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded transition-all flex items-center justify-center gap-2">
+                                <button onClick={() => startEditProduct(product)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded transition-all flex items-center justify-center gap-2">
                                     <Edit size={14}/> Edit
                                 </button>
                                 <button onClick={() => showDeleteConfirm(product.id, product.title)} className="px-3 py-2 bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded transition-all border border-slate-100 font-bold" title="Delete product" aria-label="Delete product">
@@ -391,8 +538,8 @@ export function SellerDashboard() {
                 <motion.div key="up" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="max-w-2xl mx-auto pb-20">
                     <div className="bg-white rounded border border-slate-200 shadow-sm p-6 md:p-8">
                         <div className="mb-8 text-center">
-                            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">List New Product</h2>
-                            <p className="text-slate-500 mt-2 font-medium text-sm">Complete the details below to publish to the market.</p>
+                            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">{editingProductId ? 'Edit Product' : 'List New Product'}</h2>
+                            <p className="text-slate-500 mt-2 font-medium text-sm">{editingProductId ? 'Update your listing details.' : 'Complete the details below to publish to the market.'}</p>
                         </div>
                         
                         <form onSubmit={submit} className="space-y-6">
@@ -496,11 +643,11 @@ export function SellerDashboard() {
                             >
                                 {isUploading ? (
                                   <>
-                                    <div className="animate-spin">⚙️</div> Publishing...
+                                    <div className="animate-spin">⚙️</div> Saving...
                                   </>
                                 ) : (
                                   <>
-                                    <CheckCircle2 size={20}/> Publish Product
+                                    <CheckCircle2 size={20}/> {editingProductId ? 'Save Changes' : 'Publish Product'}
                                   </>
                                 )}
                             </button>
@@ -512,25 +659,76 @@ export function SellerDashboard() {
             {/* Profile Tab */}
             {activeTab === 'profile' && (
                 <motion.div key="prof" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto space-y-6">
-                     <div className="bg-white rounded border border-slate-200 shadow-sm p-6 md:p-8 overflow-hidden relative">
-                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                            <div className="h-24 w-24 md:h-28 md:w-28 rounded border-4 border-slate-50 shadow overflow-hidden shrink-0">
-                                <img src={sellerAvatar} className="h-full w-full object-cover" alt={user?.name} />
+                    <div className="bg-white rounded border border-slate-200 shadow-sm p-6 md:p-8 overflow-hidden relative">
+                        <form
+                          className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left"
+                          onSubmit={(e) => { e.preventDefault(); setProfileConfirmOpen(true); }}
+                        >
+                          <div className="shrink-0 w-full md:w-auto">
+                            <div className="h-24 w-24 md:h-28 md:w-28 rounded border-4 border-slate-50 shadow overflow-hidden mx-auto md:mx-0">
+                              <img src={avatarUrl || sellerAvatar} className="h-full w-full object-cover" alt={user?.name} />
                             </div>
-                            <div className="flex-1 space-y-2">
-                                <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Verified Seller</span>
-                                <h2 className="text-2xl md:text-3xl font-bold text-slate-900">{user?.name}</h2>
-                                <p className="text-slate-600 font-medium text-sm">{user?.email}</p>
-                                <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-3">
-                                    <div className="px-4 py-1.5 bg-slate-100 rounded text-xs font-semibold text-slate-600 flex items-center gap-2">
-                                        <Clock size={13}/> Joined 2024
-                                    </div>
-                                    <div className="px-4 py-1.5 bg-slate-100 rounded text-xs font-semibold text-slate-600 flex items-center gap-2">
-                                        {user?.phone || 'No phone set'}
-                                    </div>
-                                </div>
+                            <div className="mt-3">
+                              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Profile photo</label>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="block w-full text-xs text-slate-600"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  try {
+                                    const formData = new FormData();
+                                    formData.append('avatar', file);
+                                    const res = await api<{ url: string }>('/api/uploads/avatar', {
+                                      method: 'POST',
+                                      body: formData,
+                                    });
+                                    setAvatarUrl(res.url);
+                                    show('Photo uploaded. Click Save Changes to apply it.', 'success');
+                                  } catch (err: any) {
+                                    show(err.message || 'Failed to upload photo', 'error');
+                                  }
+                                }}
+                              />
                             </div>
-                        </div>
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <input
+                              type="text"
+                              value={name}
+                              onChange={e => setName(e.target.value)}
+                              className="w-full text-2xl md:text-3xl font-bold text-slate-900 border-b border-slate-200 focus:border-blue-400 outline-none bg-transparent"
+                            />
+                            <input
+                              type="text"
+                              value={bio}
+                              onChange={e => setBio(e.target.value)}
+                              placeholder="Bio"
+                              className="w-full text-slate-600 font-medium text-sm border-b border-slate-200 focus:border-blue-400 outline-none bg-transparent"
+                            />
+                            <p className="text-slate-600 font-medium text-sm">{user?.email}</p>
+                            <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-3">
+                              <div className="px-4 py-1.5 bg-slate-100 rounded text-xs font-semibold text-slate-600 flex items-center gap-2">
+                                <Clock size={13}/> Joined 2024
+                              </div>
+                              <div className="px-4 py-1.5 bg-slate-100 rounded text-xs font-semibold text-slate-600 flex items-center gap-2">
+                                {user?.phone || 'No phone set'}
+                              </div>
+                            </div>
+                            <button type="submit" className="mt-4 px-4 py-2 rounded bg-blue-600 text-white font-semibold">Save Changes</button>
+                          </div>
+                        </form>
+                        <form
+                          className="mt-8"
+                          onSubmit={(e) => { e.preventDefault(); setPasswordConfirmOpen(true); }}
+                        >
+                          <div className="flex flex-col gap-2">
+                            <input type="password" value={oldPassword} onChange={e => setOldPassword(e.target.value)} placeholder="Current password" className="border rounded p-2" />
+                            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password" className="border rounded p-2" />
+                            <button type="submit" className="mt-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold">Change Password</button>
+                          </div>
+                        </form>
                      </div>
                 </motion.div>
             )}

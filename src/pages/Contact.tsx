@@ -153,7 +153,8 @@ export function Contact() {
             </form>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3 text-sm text-gray-600">
-              <Info icon={Mail} text="mugabeherve7@gmail.com" />
+              <Info icon={Mail} text="mugabeherve7@gmail.com" /><br/>
+              <Info icon={Mail} text="hirwajules2000@gmail.com" />
               <Info icon={PhoneCall} text="+250 781 908 314" />
               <Info icon={MapPin} text="Kigali, Rwanda" />
             </div>

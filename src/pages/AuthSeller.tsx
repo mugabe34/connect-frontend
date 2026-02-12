@@ -31,7 +31,12 @@ export function AuthSeller() {
         setShowGoogleLocationModal(true);
       }
     } catch (err: any) {
-      show(err.message || 'Google sign-in failed', 'error');
+      const msg = err?.message || 'Google sign-in failed';
+      if (String(msg).toLowerCase().includes('location is required')) {
+        setShowGoogleLocationModal(true);
+        return;
+      }
+      show(msg, 'error');
     }
   };
 
@@ -70,7 +75,7 @@ export function AuthSeller() {
         }
         await register(name, email, password, 'seller', { phone, location });
         show('Registered successfully', 'success');
-        setMode('login');
+        navigate('/dashboard');
       } else {
         await login(email, password);
         show('Logged in successfully', 'success');
@@ -292,12 +297,19 @@ export function AuthSeller() {
             <motion.button
               type="button"
               onClick={handleGoogleSignIn}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm font-medium hover:bg-slate-50 hover:border-sky-300 shadow-sm"
+              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm font-semibold hover:bg-slate-50 hover:border-sky-300 shadow-sm"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.99 }}
+              aria-label="Continue with Google"
             >
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">
-                G
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white border border-slate-200">
+                <svg role="img" aria-hidden="true" viewBox="0 0 48 48" className="h-4 w-4">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.73 1.22 9.24 3.6l6.9-6.9C35.85 2.5 30.37 0 24 0 14.62 0 6.51 5.56 2.56 13.64l8.05 6.26C12.43 13.4 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.5 24.5c0-1.57-.14-3.08-.41-4.5H24v9h12.65c-.54 2.91-2.18 5.37-4.65 7.05l7.15 5.56C43.9 37.64 46.5 31.57 46.5 24.5z"/>
+                  <path fill="#FBBC05" d="M10.61 28.09A14.5 14.5 0 0 1 9.5 24c0-1.41.24-2.77.68-4.06l-8.05-6.26A23.93 23.93 0 0 0 0 24c0 3.9.94 7.58 2.61 10.82l8-6.73z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.92-2.13 15.89-5.82l-7.15-5.56c-2 1.35-4.58 2.13-8.74 2.13-6.26 0-11.57-3.9-13.39-9.34l-8 6.73C6.51 42.44 14.62 48 24 48z"/>
+                  <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
               </span>
               Continue with Google
             </motion.button>

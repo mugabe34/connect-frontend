@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Heart, MessageSquare, Phone, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import { useToast } from './Toast'
-import { api } from '../lib/api'
+import { api, getImageUrl } from '../lib/api'
 import type { Product } from '../types'
 
 interface ProductCardProps {
@@ -84,9 +84,10 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
         <div className="h-48 w-full bg-slate-100 overflow-hidden relative group">
           {product.images && product.images.length > 0 ? (
             <motion.img
-              src={product.images[0].url}
+              src={getImageUrl(product.images[0].url)}
               alt={product.title}
-              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+              style={{ objectFit: 'cover' }}
               onError={(e) => {
                 e.currentTarget.src = 'https://via.placeholder.com/300x200?text=No+Image'
               }}

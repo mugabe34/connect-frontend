@@ -10,7 +10,7 @@ export function ProtectedRoute({ roles }: { roles: string[] }) {
   }
 
   if (!user || !roles.includes(user.role)) {
-    const fallback = roles.includes('admin') ? '/auth/admin' : '/auth/seller';
+    const fallback = roles.includes('admin') ? '/auth/admin' : roles.includes('buyer') ? '/auth/buyer' : '/auth/seller';
     return <Navigate to={fallback} replace />;
   }
 

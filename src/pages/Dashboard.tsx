@@ -18,7 +18,6 @@ import Admin from './Admin';
  * - System overview and analytics
  * - User management (view all users)
  * - Product management (all platform products)
- * - Orders and transactions tracking
  * - Reports and insights
  * - Settings and configuration
  */

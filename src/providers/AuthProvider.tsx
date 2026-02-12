@@ -7,8 +7,9 @@ export type UserRole = 'guest' | 'buyer' | 'seller' | 'admin'
 type AuthContextValue = {
   user: User | null
   role: UserRole
+  setUser: (user: User | null) => void
   setRole: (role: UserRole) => void
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<User>
   loginWithGoogle: () => void
   loginWithGoogleSSO: (location: string | null, role: 'buyer' | 'seller') => Promise<void>
   logout: () => Promise<void>
@@ -39,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function checkUser() {
     try {
-      const { user } = await api<{ user: User }>('/api/auth/me')
+      const { user } = await api<{ user: User | null }>('/api/auth/session')
       setUser(user)
     } catch (e) {
       setUser(null)
@@ -57,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ email, password }),
     })
     setUser(user)
+    return user
   }
 
   const loginWithGoogle = () => {
@@ -65,58 +67,85 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const loginWithGoogleSSO = async (location: string | null, userRole: 'buyer' | 'seller') => {
-    // Load Google API
-    return new Promise((resolve, reject) => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+    if (!clientId) throw new Error('Google client id not configured')
+
+    // Load Google Identity Services once
+    await new Promise<void>((resolve, reject) => {
+      // @ts-ignore
+      if (window.google?.accounts?.id) return resolve()
+      const existing = document.querySelector('script[data-google-gsi="1"]')
+      if (existing) {
+        existing.addEventListener('load', () => resolve())
+        existing.addEventListener('error', () => reject(new Error('Failed to load Google sign-in')))
+        return
+      }
       const script = document.createElement('script')
       script.src = 'https://accounts.google.com/gsi/client'
       script.async = true
       script.defer = true
-      
-      script.onload = () => {
-        // @ts-ignore
-        if (window.google?.accounts?.id) {
-          // @ts-ignore
-          window.google.accounts.id.initialize({
-            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '783256127646-8j8tpmpfnk2r16j5h5o0b5l8s09pqt98.apps.googleusercontent.com',
-            callback: async (response: any) => {
-              try {
-                if (!response.credential) {
-                  reject(new Error('No credential received'))
-                  return
-                }
-                
-                // Send token to backend
-                const result = await api<{ user: User }>('/api/auth/google', {
-                  method: 'POST',
-                  body: JSON.stringify({
-                    idToken: response.credential,
-                    role: userRole,
-                    location: location,
-                  }),
-                })
-                
-                setUser(result.user)
-                resolve()
-              } catch (err: any) {
-                reject(err)
-              }
-            },
-          })
-          
-          // Trigger the OAuth flow
-          // @ts-ignore
-          window.google.accounts.id.renderButton(
-            document.createElement('div'),
-            { theme: 'outline', size: 'large' }
-          )
-          
-          // Use the token flow instead
-          // @ts-ignore
-          window.google.accounts.id.requestIdToken(() => {})
-        }
-      }
-      
+      script.dataset.googleGsi = '1'
+      script.onload = () => resolve()
+      script.onerror = () => reject(new Error('Failed to load Google sign-in'))
       document.head.appendChild(script)
+    })
+
+    return new Promise<void>((resolve, reject) => {
+      let done = false
+      const finish = (fn: () => void) => {
+        if (done) return
+        done = true
+        fn()
+      }
+
+      // @ts-ignore
+      const google = window.google
+      if (!google?.accounts?.id) {
+        return finish(() => reject(new Error('Google sign-in failed to initialize')))
+      }
+
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response: any) => {
+          try {
+            if (!response.credential) {
+              return finish(() => reject(new Error('Google sign-in failed')))
+            }
+
+            const result = await api<{ user: User }>('/api/auth/google', {
+              method: 'POST',
+              body: JSON.stringify({
+                idToken: response.credential,
+                role: userRole,
+                location: location,
+              }),
+            })
+
+            setUser(result.user)
+            finish(() => resolve())
+          } catch (err: any) {
+            finish(() => reject(err))
+          }
+        },
+      })
+
+      // Trigger the prompt on demand (user click)
+      google.accounts.id.prompt((notification: any) => {
+        if (!notification) return
+        if (notification.isNotDisplayed?.()) {
+          finish(() =>
+            reject(
+              new Error(
+                'Google sign-in was blocked or not displayed. Please allow popups/third-party cookies and try again.'
+              )
+            )
+          )
+          return
+        }
+        if (notification.isSkippedMoment?.()) {
+          finish(() => reject(new Error('Google sign-in cancelled')))
+        }
+      })
     })
   }
 
@@ -132,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: 'buyer' | 'seller',
     extra?: { phone?: string; location?: string }
   ) => {
-    await api('/api/auth/register', {
+    const { user } = await api<{ user: User }>('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify({
         name,
@@ -143,10 +172,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         location: extra?.location,
       }),
     })
+    setUser(user)
   }
 
   const value = useMemo(
-    () => ({ user, role, setRole, login, loginWithGoogle, loginWithGoogleSSO, logout, register, isLoading }),
+    () => ({ user, role, setUser, setRole, login, loginWithGoogle, loginWithGoogleSSO, logout, register, isLoading }),
     [user, role, isLoading]
   )
 
