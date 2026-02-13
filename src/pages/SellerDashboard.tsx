@@ -62,7 +62,7 @@ export function SellerDashboard() {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   
-  const { user, logout } = useAuth();
+  const { user, setUser, logout } = useAuth();
   const { show } = useToast();
 
   // Logic: Fetching products
@@ -221,11 +221,15 @@ export function SellerDashboard() {
 
   const handleProfileSave = async () => {
     try {
-      await api('/api/auth/me', {
+      const res = await api<{ user: any }>('/api/auth/me', {
         method: 'PATCH',
         body: JSON.stringify({ name, bio, avatarUrl }),
         headers: { 'Content-Type': 'application/json' },
       });
+      setUser(res.user);
+      setName(res.user?.name ?? '');
+      setBio(res.user?.bio ?? '');
+      setAvatarUrl(res.user?.avatarUrl ?? '');
       show('Profile updated successfully', 'success');
       setProfileConfirmOpen(false);
     } catch (err: any) {
@@ -260,7 +264,10 @@ export function SellerDashboard() {
     }
   };
 
-  const sellerAvatar = getImageUrl(avatarUrl || (user as any)?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'S')}&background=0f172a&color=fff`);
+  const sellerAvatar =
+    getImageUrl(avatarUrl) ||
+    getImageUrl((user as any)?.avatarUrl) ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'S')}&background=0f172a&color=fff`;
 
   return (
     <div className="min-h-screen flex bg-slate-100 text-slate-900 font-sans">

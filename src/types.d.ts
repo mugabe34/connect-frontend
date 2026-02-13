@@ -7,6 +7,7 @@ export interface User {
   role: UserRole;
   phone?: string;
   location?: string;
+  avatarUrl?: string;
   isActive?: boolean;
   productCount?: number;
   createdAt?: string;
@@ -41,5 +42,4 @@ export interface Message {
   read?: boolean;
   fromAdmin?: boolean;
 }
-
 

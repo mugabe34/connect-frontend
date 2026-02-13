@@ -6,7 +6,6 @@ import {
   Heart,
   MapPin,
   LayoutGrid,
-  ListChecks,
   UserCircle,
   Sparkles,
   LogOut,
