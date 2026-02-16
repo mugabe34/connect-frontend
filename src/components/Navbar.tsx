@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
 import { motion } from 'framer-motion';
 import { useState } from 'react'
@@ -9,12 +9,36 @@ import {
   Info,
   PhoneCall,
   UserPlus,
+  ShoppingBag,
+  Store,
+  LogIn,
 } from 'lucide-react';
 
 export function Navbar() {
   const { role } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
+
+  const onAboutPage = location.pathname === '/about';
+
+  const browseProducts = () => {
+    setOpen(false);
+    if (role === 'guest') {
+      navigate('/auth/buyer');
+      return;
+    }
+    navigate('/products');
+  };
+
+  const startSelling = () => {
+    setOpen(false);
+    if (role === 'seller' || role === 'admin') {
+      navigate('/dashboard');
+      return;
+    }
+    navigate('/auth/seller');
+  };
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `relative text-base font-medium transition-colors duration-300 flex items-center gap-1 ${
@@ -95,6 +119,26 @@ export function Navbar() {
       {open && (
         <div className="md:hidden border-t bg-white">
           <div className="container-max py-4 space-y-3">
+            {onAboutPage && (
+              <div className="space-y-2 pb-2 border-b border-slate-100">
+                <button
+                  type="button"
+                  onClick={browseProducts}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 text-sm font-semibold inline-flex items-center justify-center gap-2"
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  Browse Products
+                </button>
+                <button
+                  type="button"
+                  onClick={startSelling}
+                  className="w-full px-3 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold inline-flex items-center justify-center gap-2"
+                >
+                  <Store className="h-4 w-4" />
+                  Start Selling
+                </button>
+              </div>
+            )}
             <NavLink to="/" onClick={() => setOpen(false)} className="block">
               Home
             </NavLink>
@@ -120,18 +164,20 @@ export function Navbar() {
                     setOpen(false);
                     navigate('/auth/buyer');
                   }}
-                  className="flex-1 px-3 py-2 rounded border border-slate-200 text-sm"
+                  className="flex-1 px-3 py-2 rounded border border-slate-200 text-sm inline-flex items-center justify-center gap-2"
                 >
-                  I&apos;m a Buyer
+                  <LogIn className="h-4 w-4" />
+                  Buyer
                 </button>
                 <button
                   onClick={() => {
                     setOpen(false);
                     navigate('/auth/seller');
                   }}
-                  className="flex-1 px-3 py-2 rounded bg-sky-600 text-white text-sm"
+                  className="flex-1 px-3 py-2 rounded bg-sky-600 text-white text-sm inline-flex items-center justify-center gap-2"
                 >
-                  I&apos;m a Seller
+                  <Store className="h-4 w-4" />
+                  Seller
                 </button>
               </div>
             )}

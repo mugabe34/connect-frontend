@@ -7,7 +7,6 @@ import {
   MapPin,
   LayoutGrid,
   UserCircle,
-  Sparkles,
   LogOut,
   RefreshCw,
   ShieldCheck,
@@ -293,31 +292,7 @@ export function BuyerDashboard() {
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-3 mb-6">
-          <div className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.22em] text-slate-500 flex items-center gap-1">
-              <Sparkles className="h-4 w-4 text-amber-500" /> Total products
-            </p>
-            <p className="text-3xl font-bold text-slate-900 mt-1">{products.length}</p>
-          </div>
-          <div className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.22em] text-slate-500 flex items-center gap-1">
-              <Heart className="h-4 w-4 text-rose-500" /> Saved
-            </p>
-            <p className="text-3xl font-bold text-slate-900 mt-1">{likedProducts.length}</p>
-          </div>
-          <div className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.22em] text-slate-500 flex items-center gap-1">
-              <MapPin className="h-4 w-4 text-emerald-600" /> Location match
-            </p>
-            <p className="text-sm text-slate-600 mt-1">
-              Showing products near{' '}
-              <span className="font-semibold text-slate-900">
-                {location || user?.location || 'anywhere'}
-              </span>
-            </p>
-          </div>
-        </div>
+        <div className="mb-6" />
 
         {/* Filters for browse tab */}
         {tab === 'browse' && (

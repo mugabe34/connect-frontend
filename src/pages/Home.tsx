@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
+
+import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { api, getImageUrl } from '../lib/api'
 import type { Product } from '../types'
+import { useAuth } from '../providers/AuthProvider'
+import { useToast } from '../components/Toast'
 import {
     Users,
     Package,
@@ -54,10 +57,31 @@ export function Home() {
     const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
     const [slide, setSlide] = useState(0)
+    const navigate = useNavigate()
+    const { role } = useAuth()
+    const { show } = useToast()
 
     const buyers = useAnimatedCounter(1500000)
     const sellers = useAnimatedCounter(1000)
     const products = useAnimatedCounter(2756)
+
+    const browseProducts = () => {
+        if (role === 'guest') {
+            show('Please sign in as a buyer to browse products.', 'info')
+            navigate('/auth/buyer')
+            return
+        }
+        navigate('/products')
+    }
+
+    const startSelling = () => {
+        if (role === 'seller' || role === 'admin') {
+            navigate('/dashboard')
+            return
+        }
+        show('Please sign in as a seller to start selling.', 'info')
+        navigate('/auth/seller')
+    }
 
     useEffect(() => {
         api<Product[]>('/api/products?featured=true&limit=8').then(setFeaturedProducts)
@@ -125,20 +149,23 @@ export function Home() {
                         A trusted marketplace connecting verified sellers with real buyers nearby.
                     </p>
 
-                    <div className="flex gap-2">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                            <input
-                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-sky-500"
-                                placeholder="Search products or locations"
-                            />
-                        </div>
-                        <Link
-                            to="/products"
-                            className="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-medium transition"
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                            type="button"
+                            onClick={browseProducts}
+                            className="px-6 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold transition inline-flex items-center justify-center gap-2"
                         >
-                            Search
-                        </Link>
+                            <Search className="h-5 w-5" />
+                            Browse Products
+                        </button>
+                        <button
+                            type="button"
+                            onClick={startSelling}
+                            className="px-6 py-3 rounded-xl border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-semibold transition inline-flex items-center justify-center gap-2"
+                        >
+                            <Upload className="h-5 w-5" />
+                            Start Selling
+                        </button>
                     </div>
 
                     <div className="flex gap-10 pt-6">

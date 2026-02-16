@@ -717,7 +717,11 @@ export function SellerDashboard() {
                             <p className="text-slate-600 font-medium text-sm">{user?.email}</p>
                             <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-3">
                               <div className="px-4 py-1.5 bg-slate-100 rounded text-xs font-semibold text-slate-600 flex items-center gap-2">
-                                <Clock size={13}/> Joined 2024
+                                <Clock size={13} />
+                                Joined{' '}
+                                {user?.createdAt
+                                  ? new Date(user.createdAt).toLocaleString()
+                                  : '-'}
                               </div>
                               <div className="px-4 py-1.5 bg-slate-100 rounded text-xs font-semibold text-slate-600 flex items-center gap-2">
                                 {user?.phone || 'No phone set'}

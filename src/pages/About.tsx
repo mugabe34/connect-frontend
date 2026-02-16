@@ -1,5 +1,8 @@
 import { motion } from 'framer-motion'
-import { Users, Zap, Shield, TrendingUp } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../providers/AuthProvider'
+import { useToast } from '../components/Toast'
+import { Users, Zap, Shield, TrendingUp, ShoppingBag, Store, LogIn } from 'lucide-react'
 
 /* =======================
    ANIMATION VARIANTS
@@ -74,6 +77,28 @@ const developers = [
    COMPONENT
 ======================= */
 export default function About() {
+  const navigate = useNavigate()
+  const { role } = useAuth()
+  const { show } = useToast()
+
+  const browseProducts = () => {
+    if (role === 'guest') {
+      show('Please sign in as a buyer to browse products.', 'info')
+      navigate('/auth/buyer')
+      return
+    }
+    navigate('/products')
+  }
+
+  const startSelling = () => {
+    if (role === 'seller' || role === 'admin') {
+      navigate('/dashboard')
+      return
+    }
+    show('Please sign in as a seller to start selling.', 'info')
+    navigate('/auth/seller')
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -226,28 +251,49 @@ export default function About() {
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
               Ready to Join Connect?
             </h2>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="/products"
-                className="
-                  px-8 py-4 rounded-xl
-                  bg-sky-600 hover:bg-sky-700
-                  text-white font-semibold text-lg
-                "
+
+            {/* Mobile: keep CTAs in the navbar, show sign-in guidance here */}
+            <div className="sm:hidden max-w-md mx-auto bg-white border border-gray-200 rounded-2xl p-5 text-left">
+              <p className="text-sm font-semibold text-gray-900">Sign in first</p>
+              <p className="text-sm text-gray-600 mt-1">
+                Use the menu to continue, or choose an option below.
+              </p>
+              <div className="mt-4 grid grid-cols-1 gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate('/auth/buyer')}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-semibold inline-flex items-center justify-center gap-2"
+                >
+                  <LogIn className="h-4 w-4" /> Sign in as Buyer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/auth/seller')}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold inline-flex items-center justify-center gap-2"
+                >
+                  <Store className="h-4 w-4" /> Sign in as Seller
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop/tablet: CTAs inline */}
+            <div className="hidden sm:flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                type="button"
+                onClick={browseProducts}
+                className="px-8 py-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold text-lg inline-flex items-center justify-center gap-2"
               >
+                <ShoppingBag className="h-5 w-5" />
                 Browse Products
-              </a>
-              <a
-                href="/auth"
-                className="
-                  px-8 py-4 rounded-xl
-                  border-2 border-sky-600
-                  text-sky-600 font-semibold text-lg
-                  hover:bg-sky-50
-                "
+              </button>
+              <button
+                type="button"
+                onClick={startSelling}
+                className="px-8 py-4 rounded-xl border-2 border-sky-600 text-sky-600 font-semibold text-lg hover:bg-sky-50 inline-flex items-center justify-center gap-2"
               >
+                <Store className="h-5 w-5" />
                 Start Selling
-              </a>
+              </button>
             </div>
           </motion.div>
         </div>
