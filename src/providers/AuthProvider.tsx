@@ -12,6 +12,7 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<User>
   loginWithGoogle: () => void
   loginWithGoogleSSO: (location: string | null, role: 'buyer' | 'seller') => Promise<void>
+  exchangeGoogleCredential: (credential: string, role: 'buyer' | 'seller', location?: string | null) => Promise<User>
   logout: () => Promise<void>
   register: (
     name: string,
@@ -42,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { user } = await api<{ user: User | null }>('/api/auth/session')
       setUser(user)
-    } catch (e) {
+    } catch {
       setUser(null)
     }
     setIsLoading(false)
@@ -59,6 +60,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
     setUser(user)
     return user
+  }
+
+  const exchangeGoogleCredential = async (
+    credential: string,
+    userRole: 'buyer' | 'seller',
+    location?: string | null
+  ) => {
+    const result = await api<{ user: User }>('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({
+        idToken: credential,
+        role: userRole,
+        location: location ?? null,
+      }),
+    })
+    setUser(result.user)
+    return result.user
   }
 
   const loginWithGoogle = () => {
@@ -130,6 +148,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       // Trigger the prompt on demand (user click)
+      if (typeof google.accounts.id.prompt !== 'function') {
+        finish(() => reject(new Error('Google sign-in failed to initialize')))
+        return
+      }
+
       google.accounts.id.prompt((notification: any) => {
         if (!notification) return
         if (notification.isNotDisplayed?.()) {
@@ -176,7 +199,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const value = useMemo(
-    () => ({ user, role, setUser, setRole, login, loginWithGoogle, loginWithGoogleSSO, logout, register, isLoading }),
+    () => ({
+      user,
+      role,
+      setUser,
+      setRole,
+      login,
+      loginWithGoogle,
+      loginWithGoogleSSO,
+      exchangeGoogleCredential,
+      logout,
+      register,
+      isLoading,
+    }),
     [user, role, isLoading]
   )
 

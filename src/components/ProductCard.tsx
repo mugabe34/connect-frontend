@@ -1,17 +1,15 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, MessageSquare, Phone, CheckCircle2 } from 'lucide-react'
+import { Heart, MessageSquare, Phone, CheckCircle2, Mail } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import { useToast } from './Toast'
 import { api, getImageUrl } from '../lib/api'
 import type { Product } from '../types'
-
 interface ProductCardProps {
   product: Product
   onLike: (id: string, liked: boolean) => void
   isLiked: boolean
 }
-
 export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
   const { user } = useAuth()
   const { show } = useToast()
@@ -19,14 +17,12 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
   const [showConnectModal, setShowConnectModal] = useState(false)
   const [connectingWith, setConnectingWith] = useState<'whatsapp' | 'email' | null>(null)
   const [connectStage, setConnectStage] = useState<'selecting' | 'loading' | 'success'>('selecting')
-
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault()
     if (!user) {
       show('Please log in to like products', 'info')
       return
     }
-
     try {
       setIsLoadingLike(true)
       const response = await api<{ product: Product; liked: boolean }>(
@@ -41,11 +37,9 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
       setIsLoadingLike(false)
     }
   }
-
   const handleConnect = (method: 'whatsapp' | 'email') => {
     setConnectingWith(method)
     setConnectStage('loading')
-
     // Simulate 1 second delay then show success
     setTimeout(() => {
       setConnectStage('success')
@@ -60,7 +54,6 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
         const body = `Hi ${product.seller?.name || 'Seller'},\n\nI'm interested in your product: ${product.title}\n\nPrice: $${product.price}\n\nPlease provide more details.`
         window.open(`mailto:${product.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
       }
-
       // Close after 2 seconds
       setTimeout(() => {
         setShowConnectModal(false)
@@ -70,10 +63,14 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
       }, 2000)
     }, 1000)
   }
-
   const hasPhone = !!product.contact?.phone
   const hasEmail = !!product.contact?.email
-
+  const WhatsAppIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 32 32" aria-hidden="true" className={className} fill="currentColor">
+      <path d="M19.11 17.53c-.26-.13-1.53-.76-1.77-.84-.24-.09-.41-.13-.58.13-.17.26-.67.84-.82 1.01-.15.17-.3.19-.56.06-.26-.13-1.1-.41-2.1-1.3-.78-.69-1.3-1.54-1.45-1.8-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.32-.02-.45-.06-.13-.58-1.4-.8-1.92-.21-.5-.42-.43-.58-.44h-.49c-.17 0-.45.06-.69.32-.24.26-.91.89-.91 2.17 0 1.28.93 2.51 1.06 2.69.13.17 1.82 2.78 4.41 3.9.62.27 1.1.43 1.48.55.62.2 1.18.17 1.62.1.5-.07 1.53-.62 1.74-1.22.22-.6.22-1.11.15-1.22-.06-.11-.24-.17-.5-.3z" />
+      <path d="M16.03 3.2c-7.03 0-12.75 5.72-12.75 12.75 0 2.25.59 4.44 1.71 6.37L3.2 28.8l6.65-1.75a12.69 12.69 0 0 0 6.18 1.6h.01c7.03 0 12.75-5.72 12.75-12.75S23.06 3.2 16.03 3.2zm0 22.06h-.01c-2.01 0-3.98-.54-5.7-1.56l-.41-.24-3.95 1.04 1.06-3.85-.27-.4a9.99 9.99 0 0 1-1.61-5.43c0-5.52 4.49-10.01 10.01-10.01 2.68 0 5.2 1.05 7.09 2.93a9.95 9.95 0 0 1 2.92 7.08c0 5.52-4.49 10.01-10.13 10.01z" />
+    </svg>
+  )
   return (
     <>
       <motion.div
@@ -101,7 +98,6 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
             </div>
           )}
         </div>
-
         {/* Product Content */}
         <div className="flex-1 p-4 flex flex-col gap-3">
           {/* Title */}
@@ -110,30 +106,25 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
               {product.title}
             </h3>
           </div>
-
           {/* Description */}
           {product.description && (
             <p className="text-xs text-slate-600 line-clamp-2">
               {product.description}
             </p>
           )}
-
           {/* Price */}
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-bold text-slate-900">
               FRw {Number(product.price || 0).toLocaleString()}
             </span>
           </div>
-
           {/* Like Count */}
           <div className="flex items-center gap-1 text-xs font-semibold text-slate-500">
             <Heart className="h-3.5 w-3.5" fill="currentColor" />
             {product.likes || 0} {product.likes === 1 ? 'like' : 'likes'}
           </div>
-
           {/* Divider */}
           <div className="h-px bg-slate-100 my-1" />
-
           {/* Seller Info */}
           <div className="space-y-2 text-xs">
             <div>
@@ -162,7 +153,6 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
             )}
           </div>
         </div>
-
         {/* Action Buttons */}
         <div className="p-4 border-t border-slate-100 space-y-2">
           <button
@@ -172,7 +162,6 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
             <MessageSquare className="h-4 w-4" />
             Connect
           </button>
-
           <button
             onClick={handleLike}
             disabled={isLoadingLike}
@@ -190,7 +179,6 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
           </button>
         </div>
       </motion.div>
-
       {/* Connect Modal */}
       {showConnectModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -209,29 +197,30 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
                     Choose your preferred contact method
                   </p>
                 </div>
-
                 <div className="space-y-2">
                   {hasPhone && (
                     <button
                       onClick={() => handleConnect('whatsapp')}
                       className="w-full p-3 rounded border border-green-300 bg-green-50 hover:bg-green-100 text-green-700 font-semibold flex items-center gap-3 transition-colors text-sm"
                     >
-                      <span className="text-xl">💬</span>
+                      <span className='h-6 w-6 rounded-full bg-emerald-600 text-white grid place-items-center flex-shrink-0'>
+                        <WhatsAppIcon className='h-4 w-4' />
+                      </span>
                       <span>WhatsApp</span>
                     </button>
                   )}
-
                   {hasEmail && (
                     <button
                       onClick={() => handleConnect('email')}
                       className="w-full p-3 rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold flex items-center gap-3 transition-colors text-sm"
                     >
-                      <span className="text-xl">📧</span>
+                      <span className='h-6 w-6 rounded-full bg-blue-600 text-white grid place-items-center flex-shrink-0'>
+                        <Mail className='h-4 w-4' />
+                      </span>
                       <span>Email</span>
                     </button>
                   )}
                 </div>
-
                 <button
                   onClick={() => setShowConnectModal(false)}
                   className="w-full px-4 py-2 rounded border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors text-sm"
@@ -240,7 +229,6 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
                 </button>
               </div>
             )}
-
             {connectStage === 'loading' && (
               <div className="p-12 text-center space-y-4">
                 <div className="flex justify-center">
@@ -260,7 +248,6 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
                 </p>
               </div>
             )}
-
             {connectStage === 'success' && (
               <div className="p-12 text-center space-y-4">
                 <motion.div

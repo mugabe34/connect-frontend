@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../providers/AuthProvider'
 import { useToast } from '../components/Toast'
 import { Users, Zap, Shield, TrendingUp, ShoppingBag, Store, LogIn } from 'lucide-react'
+import conlogo from '../assets/conlogo-256.png'
 
 /* =======================
    ANIMATION VARIANTS
@@ -122,8 +123,10 @@ export default function About() {
 
             <motion.div {...fadeInUp} className="flex flex-col items-center">
               <img
-                src={new URL('../assets/conlogo.png', import.meta.url).href}
+                src={conlogo}
                 alt="Connect Logo"
+                loading="lazy"
+                decoding="async"
                 className="w-48 md:w-80 object-contain"
               />
               <p className="mt-8 text-center text-gray-600 max-w-xs">

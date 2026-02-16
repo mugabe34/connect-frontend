@@ -132,11 +132,21 @@ export function Admin() {
       return;
     }
     try {
-      await api(`/api/admin/users/${messageModal.user.id}/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject: messageModal.subject, body: messageModal.body }),
-      });
+      const payload = { subject: messageModal.subject, body: messageModal.body };
+      try {
+        await api(`/api/admin/users/${messageModal.user.id}/message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } catch {
+        // Fallback endpoint (some deployments may not mount /api/admin for messaging)
+        await api(`/api/messages/to/${messageModal.user.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
       show('Message sent to seller', 'success');
       setMessageModal({ open: false, user: null, subject: '', body: '' });
     } catch (err: any) {
@@ -230,15 +240,15 @@ export function Admin() {
 
   return (
     <>
-    <div className="bg-gray-50 min-h-screen py-10">
+    <div className="bg-gray-50 min-h-screen py-6 sm:py-10">
       <div className="container-max">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-4 border-b border-gray-200">
-          <h1 className="text-4xl font-extrabold text-blue-800 tracking-tight">Admin Control Panel</h1>
-          <button onClick={logout} className="ml-auto px-4 py-2 rounded bg-red-600 text-white font-semibold">Sign Out</button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 pb-4 border-b border-gray-200 gap-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-blue-800 tracking-tight">Admin Control Panel</h1>
+          <button onClick={logout} className="sm:ml-auto px-4 py-2 rounded bg-red-600 text-white font-semibold w-full sm:w-auto">Sign Out</button>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-8">
-          <aside className="space-y-3">
+        <div className="grid md:grid-cols-4 gap-6 md:gap-8">
+          <aside className="flex md:block gap-2 md:space-y-3 overflow-x-auto md:overflow-visible pb-2 md:pb-0 -mx-1 px-1">
             {(['overview', 'users', 'products', 'reports', 'settings'] as Section[]).map((s) => {
               const Icon = sectionIcons[s];
               const isActive = section === s;
@@ -248,8 +258,8 @@ export function Admin() {
                   key={s}
                   onClick={() => setSection(s)}
                   className={`
-                    w-full text-left px-4 py-3 rounded-xl transition duration-300 
-                    font-medium flex items-center gap-3
+                    md:w-full text-left px-4 py-3 rounded-xl transition duration-300 
+                    font-medium flex items-center gap-3 whitespace-nowrap flex-shrink-0
                     ${
                       isActive
                         ? `bg-blue-50 text-blue-700 border-l-4 border-blue-500 shadow-md`
@@ -356,8 +366,8 @@ export function Admin() {
 
     {/* User modal */}
     {isUserModalOpen && (
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
           <h3 className="text-xl font-bold">{isCreating ? 'Add User' : 'Edit User'}</h3>
           <div className="grid grid-cols-1 gap-3">
             <input value={userForm.name || ''} onChange={(e) => setUserForm({ ...userForm, name: e.target.value })} placeholder="Name" className="border rounded px-3 py-2" />
@@ -393,8 +403,8 @@ export function Admin() {
 
     {/* Message modal */}
     {messageModal.open && (
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
           <h3 className="text-xl font-bold">Message to {messageModal.user?.name}</h3>
           <input
             value={messageModal.subject}

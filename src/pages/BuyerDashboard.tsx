@@ -77,7 +77,6 @@ export function BuyerDashboard() {
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [sellerTerm, setSellerTerm] = useState('');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState(user?.location || '');
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'nearby'>('recent');
@@ -126,19 +125,17 @@ export function BuyerDashboard() {
   // Filtered list
   const filteredProducts = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    const sellerFilter = sellerTerm.trim().toLowerCase();
     const loc = location.trim();
 
     let list = products.filter((p) => {
       const matchesTerm =
         !term ||
         p.title?.toLowerCase().includes(term) ||
-        p.description?.toLowerCase().includes(term);
-      const matchesSeller =
-        !sellerFilter || p.seller?.name?.toLowerCase().includes(sellerFilter);
+        p.description?.toLowerCase().includes(term) ||
+        p.seller?.name?.toLowerCase().includes(term);
       const matchesCategory = !category || p.category === category;
       const matchesLocation = !loc || p.location === loc || p.seller?.location === loc;
-      return matchesTerm && matchesSeller && matchesCategory && matchesLocation;
+      return matchesTerm && matchesCategory && matchesLocation;
     });
 
     if (sortBy === 'popular') {
@@ -157,11 +154,13 @@ export function BuyerDashboard() {
       );
     }
     return list;
-  }, [products, searchTerm, sellerTerm, category, location, sortBy]);
+  }, [products, searchTerm, category, location, sortBy]);
 
   const buyerName = user?.name || 'Buyer';
+  const withVersion = (url: string, version?: string) =>
+    version ? `${url}${url.includes('?') ? '&' : '?'}v=${version}` : url;
   const avatarUrl = (user as any)?.avatarUrl
-    ? getImageUrl((user as any).avatarUrl)
+    ? withVersion(getImageUrl((user as any).avatarUrl), user?.updatedAt ? encodeURIComponent(user.updatedAt) : undefined)
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(buyerName)}&background=0f172a&color=ffffff`;
 
   const handleLikeUpdate = (id: string, liked: boolean) => {
@@ -185,7 +184,6 @@ export function BuyerDashboard() {
 
   const clearFilters = () => {
     setSearchTerm('');
-    setSellerTerm('');
     setCategory('');
     setLocation(user?.location || '');
     setSortBy('recent');
@@ -297,23 +295,14 @@ export function BuyerDashboard() {
         {/* Filters for browse tab */}
         {tab === 'browse' && (
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 md:p-5 mb-8">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full border border-slate-200 rounded-xl px-4 py-3 pl-10 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
-                  placeholder="Search product name"
-                />
-              </div>
-              <div className="relative">
-                <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input
-                  value={sellerTerm}
-                  onChange={(e) => setSellerTerm(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-3 pl-10 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
-                  placeholder="Search by seller name"
+                  placeholder="Search products or sellers"
                 />
               </div>
               <div className="relative">
@@ -358,7 +347,7 @@ export function BuyerDashboard() {
                   </motion.button>
                 ))}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:col-span-2 lg:col-span-1">
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setLocation(user?.location || '')}
@@ -369,7 +358,7 @@ export function BuyerDashboard() {
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={clearFilters}
-                  className="px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold"
+                  className="px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold w-full"
                 >
                   <RefreshCw className="h-4 w-4 inline-block mr-2" />
                   Reset
@@ -392,7 +381,7 @@ export function BuyerDashboard() {
               </div>
             ) : (
               <motion.div
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
+                className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"
                 initial="hidden"
                 animate="show"
                 variants={{
@@ -426,7 +415,7 @@ export function BuyerDashboard() {
                 <p className="text-slate-600 mt-1">Browse and tap the heart icon to save items.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
                 {likedProducts.map((product) => (
                   <ProductCard
                     key={product.id}

@@ -6,7 +6,7 @@ import { useToast } from '../components/Toast';
 import { NotificationSidebar } from '../components/NotificationSidebar';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import type { Product, Message } from '../types';
-import conlogo from '../assets/conlogo.png';
+import conlogo from '../assets/conlogo-256.png';
 import {
   UploadCloud,
   PackageSearch,
@@ -105,6 +105,8 @@ export function SellerDashboard() {
     }
     fetchMessages();
   }, [user]);
+
+  const hasProducts = myProducts.length > 0;
 
   // Logic: Upload product
   async function submit(e: React.FormEvent) {
@@ -264,10 +266,12 @@ export function SellerDashboard() {
     }
   };
 
-  const sellerAvatar =
-    getImageUrl(avatarUrl) ||
-    getImageUrl((user as any)?.avatarUrl) ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'S')}&background=0f172a&color=fff`;
+  const withVersion = (url: string, version?: string) =>
+    version ? `${url}${url.includes('?') ? '&' : '?'}v=${version}` : url;
+  const avatarBase = avatarUrl || (user as any)?.avatarUrl || '';
+  const sellerAvatar = avatarBase
+    ? withVersion(getImageUrl(avatarBase), user?.updatedAt ? encodeURIComponent(user.updatedAt) : undefined)
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'S')}&background=0f172a&color=fff`;
 
   return (
     <div className="min-h-screen flex bg-slate-100 text-slate-900 font-sans">
@@ -373,6 +377,22 @@ export function SellerDashboard() {
                     <p className="text-slate-500 mt-2 text-lg">Performance insights for your active listings.</p>
                 </header>
 
+                {!hasProducts ? (
+                  <div className="bg-white border-2 border-dashed border-slate-200 rounded p-10 md:p-14 text-center">
+                    <PackageSearch size={52} className="mx-auto text-slate-300 mb-5" />
+                    <h3 className="text-2xl font-bold text-slate-900">No products yet</h3>
+                    <p className="text-slate-500 mt-2 max-w-md mx-auto text-sm">
+                      Your store starts empty. Upload your first product to make it visible to buyers.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('upload')}
+                      className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 rounded bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-lg w-full sm:w-auto"
+                    >
+                      <Plus size={18} /> Create your first listing
+                    </button>
+                  </div>
+                ) : (
+
                 {/* Stat Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <StatCard title="Total Value" value={`FRw ${myProducts.reduce((acc, p) => acc + Number(p.price), 0).toLocaleString()}`} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
@@ -476,6 +496,7 @@ export function SellerDashboard() {
                     <button onClick={() => setActiveTab('profile')} className="mt-4 text-sm font-semibold text-blue-600">Edit profile</button>
                   </div>
                 </div>
+                )}
               </motion.div>
             )}
 

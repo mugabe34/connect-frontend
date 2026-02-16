@@ -4,6 +4,7 @@ import { useToast } from '../components/Toast';
 import { useAuth } from '../providers/AuthProvider';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, LogIn, UserPlus, Phone } from 'lucide-react';
+import { GoogleGsiButton } from '../components/GoogleGsiButton';
 
 export function AuthSeller() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -14,25 +15,28 @@ export function AuthSeller() {
   const [location, setLocation] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showGoogleLocationModal, setShowGoogleLocationModal] = useState(false);
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<string | null>(null);
+  const [googleLocation, setGoogleLocation] = useState('');
   const { show } = useToast();
-  const { login, register, loginWithGoogleSSO } = useAuth();
+  const { login, register, exchangeGoogleCredential } = useAuth();
   const navigate = useNavigate();
 
-  // Handle Google Sign-In flow for sellers (requires location selection)
-  const handleGoogleSignIn = async () => {
+  const handleGoogleCredential = async (credential: string) => {
     try {
-      // For sellers, we need location. For login mode, use direct login
-      if (mode === 'login') {
-        await loginWithGoogleSSO(null, 'seller');
-        show('Logged in successfully', 'success');
-        navigate('/dashboard');
-      } else {
-        // For register mode, show location selection modal first
+      if (mode === 'register' && !location.trim()) {
+        setPendingGoogleCredential(credential);
+        setGoogleLocation('');
         setShowGoogleLocationModal(true);
+        return;
       }
+      await exchangeGoogleCredential(credential, 'seller', mode === 'register' ? location : null);
+      show(mode === 'register' ? 'Registered and logged in successfully' : 'Logged in successfully', 'success');
+      navigate('/dashboard');
     } catch (err: any) {
       const msg = err?.message || 'Google sign-in failed';
       if (String(msg).toLowerCase().includes('location is required')) {
+        setPendingGoogleCredential(credential);
+        setGoogleLocation(location || '');
         setShowGoogleLocationModal(true);
         return;
       }
@@ -40,16 +44,22 @@ export function AuthSeller() {
     }
   };
 
-  // Complete Google registration with location
   const completeGoogleRegistration = async (selectedLocation: string) => {
     if (!selectedLocation.trim()) {
       show('Please select your district', 'error');
       return;
     }
-    try {
-      await loginWithGoogleSSO(selectedLocation, 'seller');
-      show('Registered and logged in successfully', 'success');
+    if (!pendingGoogleCredential) {
+      show('Please try Google sign-in again', 'error');
       setShowGoogleLocationModal(false);
+      return;
+    }
+    try {
+      await exchangeGoogleCredential(pendingGoogleCredential, 'seller', selectedLocation);
+      show('Logged in successfully', 'success');
+      setPendingGoogleCredential(null);
+      setShowGoogleLocationModal(false);
+      setGoogleLocation('');
       navigate('/dashboard');
     } catch (err: any) {
       show(err.message || 'Registration failed', 'error');
@@ -294,25 +304,7 @@ export function AuthSeller() {
               </div>
             </div>
 
-            <motion.button
-              type="button"
-              onClick={handleGoogleSignIn}
-              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm font-semibold hover:bg-slate-50 hover:border-sky-300 shadow-sm"
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.99 }}
-              aria-label="Continue with Google"
-            >
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white border border-slate-200">
-                <svg role="img" aria-hidden="true" viewBox="0 0 48 48" className="h-4 w-4">
-                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.73 1.22 9.24 3.6l6.9-6.9C35.85 2.5 30.37 0 24 0 14.62 0 6.51 5.56 2.56 13.64l8.05 6.26C12.43 13.4 17.74 9.5 24 9.5z"/>
-                  <path fill="#4285F4" d="M46.5 24.5c0-1.57-.14-3.08-.41-4.5H24v9h12.65c-.54 2.91-2.18 5.37-4.65 7.05l7.15 5.56C43.9 37.64 46.5 31.57 46.5 24.5z"/>
-                  <path fill="#FBBC05" d="M10.61 28.09A14.5 14.5 0 0 1 9.5 24c0-1.41.24-2.77.68-4.06l-8.05-6.26A23.93 23.93 0 0 0 0 24c0 3.9.94 7.58 2.61 10.82l8-6.73z"/>
-                  <path fill="#34A853" d="M24 48c6.48 0 11.92-2.13 15.89-5.82l-7.15-5.56c-2 1.35-4.58 2.13-8.74 2.13-6.26 0-11.57-3.9-13.39-9.34l-8 6.73C6.51 42.44 14.62 48 24 48z"/>
-                  <path fill="none" d="M0 0h48v48H0z"/>
-                </svg>
-              </span>
-              Continue with Google
-            </motion.button>
+            <GoogleGsiButton onCredential={handleGoogleCredential} />
 
             <p className="text-[11px] text-slate-500 text-center">
               We only use Google to verify your identity. Your marketplace activity stays within Connect.
@@ -336,8 +328,8 @@ export function AuthSeller() {
               </p>
               <select
                 id="google-location-select"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                value={googleLocation}
+                onChange={(e) => setGoogleLocation(e.target.value)}
                 className="w-full border border-slate-200 rounded-lg px-4 py-2.5 mb-6 shadow-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-100"
                 aria-label="Select your district"
               >
@@ -387,14 +379,15 @@ export function AuthSeller() {
                 <button
                   onClick={() => {
                     setShowGoogleLocationModal(false);
-                    setLocation('');
+                    setGoogleLocation('');
+                    setPendingGoogleCredential(null);
                   }}
                   className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-medium hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={() => completeGoogleRegistration(location)}
+                  onClick={() => completeGoogleRegistration(googleLocation)}
                   className="flex-1 px-4 py-2.5 rounded-lg bg-sky-600 text-white font-medium hover:bg-sky-700"
                 >
                   Continue

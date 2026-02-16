@@ -10,7 +10,7 @@ import {
   HelpCircle
 } from 'lucide-react'
 import { useToast } from '../components/Toast'
-import get_in_touch from '../assets/get_in_touch.png'
+import get_in_touch from '../assets/get-in-touch.jpg'
 
 export function Contact() {
   const [name, setName] = useState('')
@@ -170,6 +170,8 @@ export function Contact() {
             <img
               src={get_in_touch}
               alt="Get in touch"
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover border border-gray-200"
             />
           </motion.div>

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import conlogo from '../assets/conlogo.png'
+import conlogo from '../assets/conlogo-256.png'
 
 export function Loader() {
   return (

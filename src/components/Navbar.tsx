@@ -2,7 +2,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
 import { motion } from 'framer-motion';
 import { useState } from 'react'
-import conlogo from '../assets/conlogo.png'
+import conlogo from '../assets/conlogo-256.png'
 import {
   Home,
   LockKeyhole,
@@ -52,7 +52,7 @@ export function Navbar() {
       <nav className="container-max h-20 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img src={conlogo} alt="Connect" className="h-16 w-auto" />
+          <img src={conlogo} alt="Connect" className="h-16 w-auto" loading="eager" decoding="async" />
           <span className="sr-only">Connect</span>
         </Link>
 

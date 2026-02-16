@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import conlogo from '../assets/conlogo.png'
+import conlogo from '../assets/conlogo-256.png'
 import { useState, useEffect } from 'react'
 import { api } from '../lib/api'
 

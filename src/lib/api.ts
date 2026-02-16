@@ -27,8 +27,20 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 export function getImageUrl(imagePath: string): string {
  if (!imagePath) return '';
  const normalized = String(imagePath).trim().replace(/\\/g, '/');
- // If it already starts with http, return as is
- if (normalized.startsWith('http://') || normalized.startsWith('https://')) return normalized;
+ // If it already starts with http, return as is (with a small fixup for uploads URLs).
+ if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+  try {
+   const absolute = new URL(normalized);
+   const base = new URL(API_BASE);
+   // If a stored URL points to this API host but uses the wrong protocol, rewrite it.
+   if (absolute.pathname.startsWith('/uploads/') && absolute.host === base.host) {
+    return `${base.origin}${absolute.pathname}${absolute.search}${absolute.hash}`;
+   }
+  } catch {
+   // ignore parsing errors
+  }
+  return normalized;
+ }
  const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
  const path = normalized.startsWith('/') ? normalized : `/${normalized}`;
  // Otherwise, prepend the API_BASE
