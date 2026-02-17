@@ -170,7 +170,7 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
       {/* Product Details Modal */}
       {showDetails && (
         <div
-          className="fixed inset-0 bg-black/45 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowDetails(false)}
         >
           <motion.div

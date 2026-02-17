@@ -84,7 +84,7 @@ export default function About() {
 
   const browseProducts = () => {
     if (role === 'guest') {
-      show('Please sign in as a buyer to browse products.', 'info')
+      show('Sign in or register as a buyer to browse products.', 'info')
       navigate('/auth/buyer')
       return
     }
