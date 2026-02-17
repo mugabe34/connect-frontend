@@ -392,16 +392,16 @@ export function SellerDashboard() {
                     </button>
                   </div>
                 ) : (
+                  <div className="space-y-8">
+                    {/* Stat Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <StatCard title="Total Value" value={`FRw ${myProducts.reduce((acc, p) => acc + Number(p.price), 0).toLocaleString()}`} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
+                      <StatCard title="Products" value={summary?.totalProducts ?? 0} icon={Layers} color="text-emerald-600" bg="bg-emerald-50" />
+                      <StatCard title="Engagement" value={`${summary?.totalLikes ?? 0} Likes`} icon={ThumbsUp} color="text-purple-600" bg="bg-purple-50" />
+                      <StatCard title="Approval" value={summary?.approvedProducts ?? 0} icon={CheckCircle2} color="text-sky-600" bg="bg-sky-50" />
+                    </div>
 
-                {/* Stat Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard title="Total Value" value={`FRw ${myProducts.reduce((acc, p) => acc + Number(p.price), 0).toLocaleString()}`} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
-                    <StatCard title="Products" value={summary?.totalProducts ?? 0} icon={Layers} color="text-emerald-600" bg="bg-emerald-50" />
-                    <StatCard title="Engagement" value={`${summary?.totalLikes ?? 0} Likes`} icon={ThumbsUp} color="text-purple-600" bg="bg-purple-50" />
-                    <StatCard title="Approval" value={summary?.approvedProducts ?? 0} icon={CheckCircle2} color="text-sky-600" bg="bg-sky-50" />
-                </div>
-
-                <div className="grid lg:grid-cols-3 gap-6">
+                    <div className="grid lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded border border-slate-200 shadow-sm">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="font-bold text-lg">Top Performers</h3>
@@ -443,7 +443,7 @@ export function SellerDashboard() {
                     </div>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-6">
+                    <div className="grid lg:grid-cols-2 gap-6">
                   <div className="bg-white border border-slate-200 rounded shadow-sm p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-bold text-slate-900">Messages from Admin</h3>
@@ -496,6 +496,7 @@ export function SellerDashboard() {
                     <button onClick={() => setActiveTab('profile')} className="mt-4 text-sm font-semibold text-blue-600">Edit profile</button>
                   </div>
                 </div>
+                  </div>
                 )}
               </motion.div>
             )}

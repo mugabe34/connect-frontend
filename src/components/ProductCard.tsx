@@ -15,6 +15,7 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
   const { show } = useToast()
   const [isLoadingLike, setIsLoadingLike] = useState(false)
   const [showConnectModal, setShowConnectModal] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
   const [connectingWith, setConnectingWith] = useState<'whatsapp' | 'email' | null>(null)
   const [connectStage, setConnectStage] = useState<'selecting' | 'loading' | 'success'>('selecting')
   const handleLike = async (e: React.MouseEvent) => {
@@ -77,13 +78,18 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
         className="h-full bg-white rounded border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col"
         whileHover={{ y: -2 }}
       >
-        {/* Product Image - No Border Radius */}
-        <div className="h-48 w-full bg-slate-100 overflow-hidden relative group">
+        {/* Product Image */}
+        <button
+          type="button"
+          onClick={() => setShowDetails(true)}
+          className="h-52 w-full bg-slate-100 overflow-hidden relative group text-left"
+          aria-label={`View details for ${product.title}`}
+        >
           {product.images && product.images.length > 0 ? (
             <motion.img
               src={getImageUrl(product.images[0].url)}
               alt={product.title}
-              className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-300"
               style={{ objectFit: 'cover' }}
               onError={(e) => {
                 e.currentTarget.src = 'https://via.placeholder.com/300x200?text=No+Image'
@@ -97,61 +103,42 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
               </div>
             </div>
           )}
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+            <span className="px-2.5 py-1 rounded bg-white/90 text-slate-900 text-sm font-bold shadow">
+              FRw {Number(product.price || 0).toLocaleString()}
+            </span>
+            <span className="px-2 py-1 rounded bg-white/90 text-slate-700 text-xs font-semibold flex items-center gap-1 shadow">
+              <Heart className="h-3.5 w-3.5" fill="currentColor" />
+              {product.likes || 0}
+            </span>
+          </div>
+        </button>
         {/* Product Content */}
         <div className="flex-1 p-4 flex flex-col gap-3">
           {/* Title */}
           <div>
-            <h3 className="font-bold text-slate-900 line-clamp-2 text-sm">
+            <h3 className="font-bold text-slate-900 line-clamp-2 text-base">
               {product.title}
             </h3>
           </div>
-          {/* Description */}
-          {product.description && (
-            <p className="text-xs text-slate-600 line-clamp-2">
-              {product.description}
-            </p>
-          )}
-          {/* Price */}
-          <div className="flex items-baseline gap-2">
-            <span className="text-lg font-bold text-slate-900">
-              FRw {Number(product.price || 0).toLocaleString()}
-            </span>
-          </div>
-          {/* Like Count */}
-          <div className="flex items-center gap-1 text-xs font-semibold text-slate-500">
-            <Heart className="h-3.5 w-3.5" fill="currentColor" />
-            {product.likes || 0} {product.likes === 1 ? 'like' : 'likes'}
-          </div>
-          {/* Divider */}
-          <div className="h-px bg-slate-100 my-1" />
           {/* Seller Info */}
-          <div className="space-y-2 text-xs">
-            <div>
-              <p className="text-slate-400 font-medium">Seller</p>
-              <p className="text-slate-900 font-semibold">
-                {product.seller?.name || 'Unknown Seller'}
-              </p>
-            </div>
-            {product.contact?.phone && (
-              <div>
-                <p className="text-slate-400 font-medium flex items-center gap-1">
-                  <Phone className="h-3 w-3" /> Phone
-                </p>
-                <p className="text-slate-900 font-mono text-xs">
-                  {product.contact.phone}
-                </p>
-              </div>
-            )}
+          <div className="flex items-center justify-between text-xs text-slate-500">
+            <span className="font-medium">{product.seller?.name || 'Unknown Seller'}</span>
             {product.seller?.location && (
-              <div>
-                <p className="text-slate-400 font-medium">📍 Location</p>
-                <p className="text-slate-900 font-semibold">
-                  {product.seller.location}
-                </p>
-              </div>
+              <span className="flex items-center gap-1">
+                <span>📍</span>
+                <span className="font-medium">{product.seller.location}</span>
+              </span>
             )}
           </div>
+          <button
+            type="button"
+            onClick={() => setShowDetails(true)}
+            className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+          >
+            View details
+          </button>
         </div>
         {/* Action Buttons */}
         <div className="p-4 border-t border-slate-100 space-y-2">
@@ -179,6 +166,110 @@ export function ProductCard({ product, onLike, isLiked }: ProductCardProps) {
           </button>
         </div>
       </motion.div>
+
+      {/* Product Details Modal */}
+      {showDetails && (
+        <div
+          className="fixed inset-0 bg-black/45 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowDetails(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grid md:grid-cols-2">
+              <div className="bg-slate-100">
+                {product.images && product.images.length > 0 ? (
+                  <img
+                    src={getImageUrl(product.images[0].url)}
+                    alt={product.title}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/600x400?text=No+Image'
+                    }}
+                  />
+                ) : (
+                  <div className="h-full min-h-[240px] flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                    <div className="text-center">
+                      <div className="text-5xl mb-2">📦</div>
+                      <p className="text-sm text-slate-500">No image</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">{product.title}</h3>
+                  <p className="text-sm text-slate-500 mt-1">{product.category || 'General'}</p>
+                </div>
+                {product.description && (
+                  <p className="text-sm text-slate-700 leading-relaxed">{product.description}</p>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-extrabold text-slate-900">
+                    FRw {Number(product.price || 0).toLocaleString()}
+                  </span>
+                  <span className="text-sm font-semibold text-slate-600 flex items-center gap-2">
+                    <Heart className="h-4 w-4" fill="currentColor" />
+                    {product.likes || 0} {product.likes === 1 ? 'like' : 'likes'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p className="text-slate-400 font-medium">Seller</p>
+                    <p className="text-slate-900 font-semibold">{product.seller?.name || 'Unknown Seller'}</p>
+                  </div>
+                  {product.seller?.location && (
+                    <div>
+                      <p className="text-slate-400 font-medium">Location</p>
+                      <p className="text-slate-900 font-semibold">{product.seller.location}</p>
+                    </div>
+                  )}
+                  {product.contact?.phone && (
+                    <div>
+                      <p className="text-slate-400 font-medium flex items-center gap-1">
+                        <Phone className="h-3 w-3" /> Phone
+                      </p>
+                      <p className="text-slate-900 font-mono text-xs">
+                        {product.contact.phone}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="pt-2 space-y-2">
+                  <button
+                    onClick={() => setShowConnectModal(true)}
+                    className="w-full px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Connect
+                  </button>
+                  <button
+                    onClick={handleLike}
+                    disabled={isLoadingLike}
+                    className={`w-full px-4 py-2 rounded border font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                      isLiked
+                        ? 'border-red-500 bg-red-50 text-red-600 hover:bg-red-100'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-red-300 hover:text-red-600'
+                    }`}
+                  >
+                    <Heart className="h-4 w-4" fill={isLiked ? 'currentColor' : 'none'} />
+                    {isLoadingLike ? 'Loading...' : isLiked ? 'Liked' : 'Like'}
+                  </button>
+                  <button
+                    onClick={() => setShowDetails(false)}
+                    className="w-full px-4 py-2 rounded border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
       {/* Connect Modal */}
       {showConnectModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
