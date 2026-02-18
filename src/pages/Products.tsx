@@ -6,6 +6,7 @@ import { useToast } from '../components/Toast';
 import type { Product } from '../types';
 import { Search, ChevronDown, MapPin } from 'lucide-react';
 import { useAuth } from '../providers/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -26,8 +27,16 @@ export function Products() {
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'location'>('newest');
   const [likedProducts, setLikedProducts] = useState<Set<string>>(new Set());
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { show } = useToast();
   const [buyerLocation, setBuyerLocation] = useState<string>(user?.location || '');
+
+  useEffect(() => {
+    if (!user || user.role !== 'buyer') {
+      show('Please sign in as a buyer to browse products.', 'info');
+      navigate('/auth/buyer', { replace: true });
+    }
+  }, [user, show, navigate]);
 
   useEffect(() => {
     async function load() {
@@ -53,7 +62,7 @@ export function Products() {
             console.error('Failed to load liked products', err);
           }
         }
-      } catch (err) {
+      } catch {
         show('Failed to load products', 'error');
       }
     }
@@ -61,7 +70,7 @@ export function Products() {
   }, [q, category, user]);
 
   useEffect(() => {
-    let sorted = [...items];
+    const sorted = [...items];
 
     if (sortBy === 'popular') {
       sorted.sort((a, b) => (b.likes || 0) - (a.likes || 0));

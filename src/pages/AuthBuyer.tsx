@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
 import { useAuth } from '../providers/AuthProvider';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, LogIn, UserPlus } from 'lucide-react';
 import { GoogleGsiButton } from '../components/GoogleGsiButton';
+
+const dashboardByRole = (role: 'buyer' | 'seller' | 'admin') =>
+  role === 'buyer' ? '/buyer/dashboard' : role === 'seller' ? '/dashboard' : '/admin';
 
 export function AuthBuyer() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -13,14 +16,8 @@ export function AuthBuyer() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const { show } = useToast();
-  const { user, isLoading, login, register, exchangeGoogleCredential } = useAuth();
+  const { login, register, exchangeGoogleCredential } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isLoading && user?.role === 'buyer') {
-      navigate('/buyer/dashboard', { replace: true });
-    }
-  }, [isLoading, user, navigate]);
 
   const formVariant = {
     initial: { opacity: 0, y: 10 },
@@ -172,14 +169,16 @@ export function AuthBuyer() {
               <GoogleGsiButton
                 onCredential={async (credential) => {
                   try {
-                    await exchangeGoogleCredential(credential, 'buyer', null);
-                    show('Logged in successfully', 'success');
-                    navigate('/buyer/dashboard', { replace: true });
+                    const result = await exchangeGoogleCredential(credential, 'buyer', null);
+                    const target = dashboardByRole(result.user.role);
+                    show(result.isNewUser ? 'Buyer account created with Google' : 'Logged in with Google', 'success');
+                    navigate(target, { replace: true });
                   } catch (err: any) {
                     show(err.message || 'Google sign-in failed', 'error');
                   }
                 }}
               />
+              <p className="mt-2 text-xs text-slate-500 text-center">Continue with Google for instant access.</p>
             </div>
           </form>
         </motion.div>

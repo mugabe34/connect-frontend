@@ -672,7 +672,7 @@ export function SellerDashboard() {
                             >
                                 {isUploading ? (
                                   <>
-                                    <div className="animate-spin">⚙️</div> Saving...
+                                    <div className="animate-spin">...</div> Saving...
                                   </>
                                 ) : (
                                   <>

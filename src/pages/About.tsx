@@ -83,7 +83,7 @@ export default function About() {
   const { show } = useToast()
 
   const browseProducts = () => {
-    if (role === 'guest') {
+    if (role !== 'buyer') {
       show('Please sign in as a buyer to browse products.', 'info')
       navigate('/auth/buyer')
       return

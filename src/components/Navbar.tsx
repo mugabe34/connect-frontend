@@ -1,5 +1,6 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
+import { useToast } from './Toast';
 import { motion } from 'framer-motion';
 import { useState } from 'react'
 import conlogo from '../assets/conlogo-256.png'
@@ -16,6 +17,7 @@ import {
 
 export function Navbar() {
   const { role } = useAuth();
+  const { show } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -24,7 +26,8 @@ export function Navbar() {
 
   const browseProducts = () => {
     setOpen(false);
-    if (role === 'guest') {
+    if (role !== 'buyer') {
+      show('Please sign in as a buyer to browse products.', 'info');
       navigate('/auth/buyer');
       return;
     }

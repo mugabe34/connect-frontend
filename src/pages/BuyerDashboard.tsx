@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Filter,
@@ -8,7 +9,6 @@ import {
   LayoutGrid,
   UserCircle,
   LogOut,
-  RefreshCw,
   ShieldCheck,
 } from 'lucide-react';
 import { api, getImageUrl } from '../lib/api';
@@ -68,6 +68,8 @@ const CATEGORIES = [
 export function BuyerDashboard() {
   const { user, setUser, logout } = useAuth();
   const { show } = useToast();
+  const showRef = useRef(show);
+  const navigate = useNavigate();
 
   const [tab, setTab] = useState<Tab>('browse');
   const [isLoading, setIsLoading] = useState(true);
@@ -78,7 +80,7 @@ export function BuyerDashboard() {
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('');
-  const [location, setLocation] = useState(user?.location || '');
+  const [location, setLocation] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'nearby'>('recent');
 
   // Profile
@@ -96,6 +98,17 @@ export function BuyerDashboard() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (!user || user.role !== 'buyer') {
+      show('Please sign in as a buyer to access your dashboard.', 'info');
+      navigate('/auth/buyer', { replace: true });
+    }
+  }, [user, show, navigate]);
+
+  useEffect(() => {
+    showRef.current = show;
+  }, [show]);
+
   // Initial load
   useEffect(() => {
     let mounted = true;
@@ -107,11 +120,15 @@ export function BuyerDashboard() {
           api<Product[]>('/api/products/liked/me'),
         ]);
         if (!mounted) return;
-        setProducts(allProducts);
-        setLikedProducts(saved);
-        setLikedIds(new Set(saved.map((p) => p.id)));
+        const isConnectable = (p: Product) =>
+          !!p?.seller && (!!p?.contact?.phone || !!p?.contact?.email);
+        const visibleProducts = allProducts.filter(isConnectable);
+        const visibleSaved = saved.filter(isConnectable);
+        setProducts(visibleProducts);
+        setLikedProducts(visibleSaved);
+        setLikedIds(new Set(visibleSaved.map((p) => p.id)));
       } catch (err: any) {
-        show(err.message || 'Failed to load products', 'error');
+        showRef.current(err.message || 'Failed to load products', 'error');
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -120,7 +137,7 @@ export function BuyerDashboard() {
     return () => {
       mounted = false;
     };
-  }, [show]);
+  }, []);
 
   // Filtered list
   const filteredProducts = useMemo(() => {
@@ -165,28 +182,44 @@ export function BuyerDashboard() {
 
   const handleLikeUpdate = (id: string, liked: boolean) => {
     setLikedIds((prev) => {
+      const wasLiked = prev.has(id);
+      if (wasLiked === liked) return prev;
+
+      const likesDelta = liked ? 1 : -1;
       const next = new Set(prev);
       if (liked) next.add(id);
       else next.delete(id);
+
+      setProducts((prevProducts) => {
+        let updatedProduct: Product | undefined;
+        const nextProducts = prevProducts.map((p) => {
+          if (p.id !== id) return p;
+          updatedProduct = {
+            ...p,
+            likes: Math.max(0, (p.likes || 0) + likesDelta),
+          };
+          return updatedProduct;
+        });
+
+        setLikedProducts((prevLiked) => {
+          if (liked) {
+            if (prevLiked.some((p) => p.id === id)) {
+              return prevLiked.map((p) =>
+                p.id === id
+                  ? { ...p, likes: Math.max(0, (p.likes || 0) + likesDelta) }
+                  : p
+              );
+            }
+            return updatedProduct ? [updatedProduct, ...prevLiked] : prevLiked;
+          }
+          return prevLiked.filter((p) => p.id !== id);
+        });
+
+        return nextProducts;
+      });
+
       return next;
     });
-
-    const product = products.find((p) => p.id === id);
-    if (!product) return;
-    setLikedProducts((prev) => {
-      if (liked) {
-        if (prev.find((p) => p.id === id)) return prev;
-        return [product, ...prev];
-      }
-      return prev.filter((p) => p.id !== id);
-    });
-  };
-
-  const clearFilters = () => {
-    setSearchTerm('');
-    setCategory('');
-    setLocation(user?.location || '');
-    setSortBy('recent');
   };
 
   const saveProfile = async () => {
@@ -354,14 +387,6 @@ export function BuyerDashboard() {
                   className="px-4 py-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold w-full"
                 >
                   Use my location
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={clearFilters}
-                  className="px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold w-full"
-                >
-                  <RefreshCw className="h-4 w-4 inline-block mr-2" />
-                  Reset
                 </motion.button>
               </div>
             </div>

@@ -75,15 +75,14 @@ export function Home() {
         return () => clearInterval(interval)
     }, [])
 
-    const browseProducts = () => {
-        if (role === 'guest') {
-            show('Please sign in as a buyer to browse products.', 'info')
-            navigate('/auth/buyer')
+ const browseProducts= () => {
+        if (role === 'buyer' ) {
+            navigate('/products')
             return
         }
-        navigate('/products')
+        show('Please sign in as a buyer to start browsing products.', 'info')
+        navigate('/auth/buyer')
     }
-
     const startSelling = () => {
         if (role === 'seller' || role === 'admin') {
             navigate('/dashboard')

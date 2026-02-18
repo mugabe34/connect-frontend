@@ -3,6 +3,10 @@ import { api } from '../lib/api'
 import type { User } from '../types'
 
 export type UserRole = 'guest' | 'buyer' | 'seller' | 'admin'
+export type GoogleAuthResult = {
+  user: User
+  isNewUser: boolean
+}
 
 type AuthContextValue = {
   user: User | null
@@ -12,7 +16,11 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<User>
   loginWithGoogle: () => void
   loginWithGoogleSSO: (location: string | null, role: 'buyer' | 'seller') => Promise<void>
-  exchangeGoogleCredential: (credential: string, role: 'buyer' | 'seller', location?: string | null) => Promise<User>
+  exchangeGoogleCredential: (
+    credential: string,
+    role: 'buyer' | 'seller',
+    location?: string | null
+  ) => Promise<GoogleAuthResult>
   logout: () => Promise<void>
   register: (
     name: string,
@@ -67,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     userRole: 'buyer' | 'seller',
     location?: string | null
   ) => {
-    const result = await api<{ user: User }>('/api/auth/google', {
+    const result = await api<GoogleAuthResult>('/api/auth/google', {
       method: 'POST',
       body: JSON.stringify({
         idToken: credential,
@@ -76,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }),
     })
     setUser(result.user)
-    return result.user
+    return result
   }
 
   const loginWithGoogle = () => {

@@ -6,6 +6,9 @@ import { motion } from 'framer-motion';
 import { User, Mail, Lock, LogIn, UserPlus, Phone } from 'lucide-react';
 import { GoogleGsiButton } from '../components/GoogleGsiButton';
 
+const dashboardByRole = (role: 'buyer' | 'seller' | 'admin') =>
+  role === 'buyer' ? '/buyer/dashboard' : role === 'seller' ? '/dashboard' : '/admin';
+
 export function AuthSeller() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [name, setName] = useState('');
@@ -29,9 +32,9 @@ export function AuthSeller() {
         setShowGoogleLocationModal(true);
         return;
       }
-      await exchangeGoogleCredential(credential, 'seller', mode === 'register' ? location : null);
-      show(mode === 'register' ? 'Registered and logged in successfully' : 'Logged in successfully', 'success');
-      navigate('/dashboard');
+      const result = await exchangeGoogleCredential(credential, 'seller', mode === 'register' ? location : null);
+      show(result.isNewUser ? 'Seller account created with Google' : 'Logged in with Google', 'success');
+      navigate(dashboardByRole(result.user.role), { replace: true });
     } catch (err: any) {
       const msg = err?.message || 'Google sign-in failed';
       if (String(msg).toLowerCase().includes('location is required')) {
@@ -55,12 +58,12 @@ export function AuthSeller() {
       return;
     }
     try {
-      await exchangeGoogleCredential(pendingGoogleCredential, 'seller', selectedLocation);
-      show('Logged in successfully', 'success');
+      const result = await exchangeGoogleCredential(pendingGoogleCredential, 'seller', selectedLocation);
+      show(result.isNewUser ? 'Seller account created with Google' : 'Logged in with Google', 'success');
       setPendingGoogleCredential(null);
       setShowGoogleLocationModal(false);
       setGoogleLocation('');
-      navigate('/dashboard');
+      navigate(dashboardByRole(result.user.role), { replace: true });
     } catch (err: any) {
       show(err.message || 'Registration failed', 'error');
     }
@@ -307,7 +310,7 @@ export function AuthSeller() {
             <GoogleGsiButton onCredential={handleGoogleCredential} />
 
             <p className="text-[11px] text-slate-500 text-center">
-              We only use Google to verify your identity. Your marketplace activity stays within Connect.
+              Continue with Google for instant access. We only use Google to verify identity.
             </p>
           </form>
         </motion.div>

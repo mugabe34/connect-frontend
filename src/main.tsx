@@ -25,17 +25,19 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'about', element: <About /> },
-      { path: 'products', element: <Products /> },
+      {
+        element: <ProtectedRoute roles={['buyer']} />,
+        children: [
+          { path: 'products', element: <Products /> },
+          { path: 'buyer/dashboard', element: <BuyerDashboard /> },
+        ],
+      },
       { path: 'auth', element: <Auth /> },
       {
         element: <ProtectedRoute roles={['seller', 'admin']} />,
         children: [
           { path: 'dashboard', element: <Dashboard /> },
         ],
-      },
-      {
-        element: <ProtectedRoute roles={['buyer']} />,
-        children: [{ path: 'buyer/dashboard', element: <BuyerDashboard /> }],
       },
       {
         element: <ProtectedRoute roles={['admin']} />,
