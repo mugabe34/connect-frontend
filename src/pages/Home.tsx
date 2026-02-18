@@ -20,18 +20,23 @@ import {
     Twitter
 } from 'lucide-react'
 
+import iphone17promax from '../assets/iphone17promax.jpg'
 import jackets from '../assets/jackets.jpg'
-import pants from '../assets/pants.jpg'
+import chair from '../assets/chair.jpg'
 import shoes from '../assets/shoes.jpg'
 import images from '../assets/images.jpg'
 import stepOne from '../assets/step-1.jpg'
 import stepTwo from '../assets/step-2.jpg'
-import cotton_jacket from '../assets/cotton_jacket.jpg'
+import fridge from '../assets/fridge.jpg'
 import barca from '../assets/barca-tshirt.jpg'
+import ps5 from'../assets/ps5.jpg'
+
+
+
 
 /* ================= HELPERS ================= */
 
-const demoImages = [pants, jackets, shoes, images, cotton_jacket, barca]
+const demoImages = [chair, jackets, shoes, images, fridge, barca,ps5,iphone17promax]
 
 function useAnimatedCounter(to: number, duration = 2000) {
     const [count, setCount] = useState(0)
