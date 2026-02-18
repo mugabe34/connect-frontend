@@ -80,9 +80,12 @@ export function Home() {
         return () => clearInterval(interval)
     }, [])
 
- const browseProducts= () => {
-        if (role === 'buyer' ) {
-            navigate('/products')
+
+    const browseProducts = () => {
+        if (role === 'guest') {
+            show('Sign in or register as a buyer to browse products.', 'info')
+            navigate('/auth/buyer')
+
             return
         }
         show('Please sign in as a buyer to start browsing products.', 'info')
@@ -314,7 +317,13 @@ export function Home() {
                     </div>
                     <div className="space-y-3">
                         <Link to="/" className="block hover:text-sky-300">Home</Link>
-                        <Link to="/products" className="block hover:text-sky-300">Browse Products</Link>
+                        <button
+                            type="button"
+                            onClick={browseProducts}
+                            className="block text-left hover:text-sky-300"
+                        >
+                            Browse Products
+                        </button>
                     </div>
                     <div className="flex gap-6">
                         <Facebook className="hover:text-sky-300 cursor-pointer" />
