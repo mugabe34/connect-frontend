@@ -85,11 +85,9 @@ export function Home() {
         if (role === 'guest') {
             show('Sign in or register as a buyer to browse products.', 'info')
             navigate('/auth/buyer')
-
             return
         }
-        show('Please sign in as a buyer to start browsing products.', 'info')
-        navigate('/auth/buyer')
+        navigate('/products')
     }
     const startSelling = () => {
         if (role === 'seller' || role === 'admin') {
