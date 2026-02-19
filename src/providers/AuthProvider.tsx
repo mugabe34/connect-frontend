@@ -8,6 +8,21 @@ export type GoogleAuthResult = {
   isNewUser: boolean
 }
 
+const normalizeRole = (rawRole: unknown): UserRole => {
+  const value = String(rawRole ?? '').trim().toLowerCase()
+  if (value === 'buyer' || value === 'seller' || value === 'admin') {
+    return value
+  }
+  return 'guest'
+}
+
+const normalizeUser = (rawUser: User | null): User | null => {
+  if (!rawUser) return null
+  const role = normalizeRole(rawUser.role)
+  if (role === 'guest') return null
+  return { ...rawUser, role }
+}
+
 type AuthContextValue = {
   user: User | null
   role: UserRole
@@ -50,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function checkUser() {
     try {
       const { user } = await api<{ user: User | null }>('/api/auth/session')
-      setUser(user)
+      setUser(normalizeUser(user))
     } catch {
       setUser(null)
     }
@@ -66,8 +81,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     })
-    setUser(user)
-    return user
+    const normalized = normalizeUser(user)
+    if (!normalized) {
+      throw new Error('Unsupported account role')
+    }
+    setUser(normalized)
+    return normalized
   }
 
   const exchangeGoogleCredential = async (
@@ -83,8 +102,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         location: location ?? null,
       }),
     })
-    setUser(result.user)
-    return result
+    const normalized = normalizeUser(result.user)
+    if (!normalized) {
+      throw new Error('Unsupported account role')
+    }
+    setUser(normalized)
+    return { ...result, user: normalized }
   }
 
   const loginWithGoogle = () => {
@@ -147,7 +170,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }),
             })
 
-            setUser(result.user)
+            const normalized = normalizeUser(result.user)
+            if (!normalized) {
+              throw new Error('Unsupported account role')
+            }
+            setUser(normalized)
             finish(() => resolve())
           } catch (err: any) {
             finish(() => reject(err))
@@ -203,7 +230,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         location: extra?.location,
       }),
     })
-    setUser(user)
+    const normalized = normalizeUser(user)
+    if (!normalized) {
+      throw new Error('Unsupported account role')
+    }
+    setUser(normalized)
   }
 
   const value = useMemo(
