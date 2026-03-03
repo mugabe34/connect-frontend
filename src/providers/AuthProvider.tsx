@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const loginWithGoogle = () => {
-    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+    const API_BASE = import.meta.env.VITE_API_BASE || 'https://connect-backend-5.onrender.com'
     window.location.href = `${API_BASE}/api/auth/google`
   }
 
