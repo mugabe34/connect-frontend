@@ -2,15 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root {
-  height: 100%;
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply antialiased;
+  }
 }
 
-.container-max {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+@layer components {
+  .container-max {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .glass {
+    @apply bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/[0.15];
+  }
+
+  .glass-strong {
+    @apply bg-white/[0.08] backdrop-blur-2xl border border-white/[0.12] shadow-xl shadow-black/[0.2];
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl;
+  }
+
+  .glass-card-strong {
+    @apply glass-strong rounded-2xl;
+  }
+
+  .glass-input {
+    @apply glass rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 w-full;
+  }
+
+  .glass-select {
+    @apply glass-input appearance-none cursor-pointer;
+  }
+
+  .glass-tab {
+    @apply glass rounded-xl px-4 py-2 text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/[0.08] transition-all;
+  }
+
+  .glass-tab-active {
+    @apply bg-blue-500 text-white shadow-lg shadow-blue-500/25 rounded-xl px-4 py-2 text-sm font-semibold;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent;
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15), 0 0 40px rgba(59, 130, 246, 0.05);
+  }
+
+  .glow-sm {
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+  }
 }
 
-/* Subtle global hover transitions */
-* {
-  @apply transition-colors duration-200;
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
