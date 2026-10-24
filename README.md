@@ -12,6 +12,10 @@ Environment:
 
 - `VITE_API_BASE` points to the backend API base URL
 
+## Deploy on Render
+
+Create a Blueprint from this repository's `render.yaml`. Set `VITE_API_BASE` to the deployed backend URL without a trailing slash. If Google sign-in is enabled, also set `VITE_GOOGLE_CLIENT_ID` to the matching OAuth client ID. After deploying the frontend, add its origin to the backend's `CLIENT_URLS` setting and redeploy the backend.
+
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

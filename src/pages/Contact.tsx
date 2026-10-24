@@ -11,22 +11,43 @@ import {
 } from 'lucide-react'
 import { useToast } from '../components/Toast'
 import get_in_touch from '../assets/get-in-touch.jpg'
+import { api } from '../lib/api'
+import { CONNECT_CONTACT_EMAILS, CONNECT_CONTACT_PHONES } from '../lib/contact'
 
 export function Contact() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const { show } = useToast()
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (!name || !email || !message) {
       return show('Please fill all fields', 'error')
     }
-    show('Message sent (stub)', 'success')
-    setName('')
-    setEmail('')
-    setMessage('')
+    setSubmitting(true)
+    try {
+      const result = await api<{ reference: string; message: string }>('/api/support/tickets', {
+        method: 'POST',
+        body: JSON.stringify({
+          description: `Contact form from ${name.trim()}: ${message.trim()}`,
+          category: 'general',
+          contactEmail: email.trim(),
+          steps: [],
+          pagePath: '/contact',
+          submissionKey: crypto.randomUUID(),
+        }),
+      })
+      show(`Report ${result.reference} submitted. ${result.message}`, 'success')
+      setName('')
+      setEmail('')
+      setMessage('')
+    } catch (error) {
+      show(error instanceof Error ? error.message : 'Could not send your message. Please try again.', 'error')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -112,7 +133,8 @@ export function Contact() {
                   </label>
                   <input
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
+                required
                     className="w-full border border-gray-300 px-4 py-3 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"
                     placeholder="Your full name"
                   />
@@ -126,6 +148,7 @@ export function Contact() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    required
                     className="w-full border border-gray-300 px-4 py-3 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"
                     placeholder="you@example.com"
                   />
@@ -139,6 +162,7 @@ export function Contact() {
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  required
                   className="w-full min-h-[160px] border border-gray-300 px-4 py-3 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"
                   placeholder="Tell us how we can help you..."
                 />
@@ -146,16 +170,16 @@ export function Contact() {
 
               <button
                 type="submit"
+                disabled={submitting}
                 className="w-full bg-sky-600 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-700 transition"
               >
-                Send Message
+                {submitting ? 'Sending…' : 'Send Message'}
               </button>
             </form>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3 text-sm text-gray-600">
-              <Info icon={Mail} text="mugabeherve7@gmail.com" /><br/>
-              <Info icon={Mail} text="hirwajules2000@gmail.com" />
-              <Info icon={PhoneCall} text="+250 781 908 314" />
+              {CONNECT_CONTACT_EMAILS.map((contactEmail) => <Info key={contactEmail} icon={Mail} text={contactEmail} />)}
+              {CONNECT_CONTACT_PHONES.map((phone) => <Info key={phone} icon={PhoneCall} text={phone} />)}
               <Info icon={MapPin} text="Kigali, Rwanda" />
             </div>
           </motion.div>

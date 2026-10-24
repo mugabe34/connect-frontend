@@ -71,6 +71,11 @@ const developers = [
     name: 'Maurice',
     role: 'Full-Stack Developer',
     focus: 'Frontend & User Experience Design'
+  },
+  {
+    name: 'Tetero',
+    role: 'Full-Stack Developer',
+    focus: 'Full-Stack Development'
   }
 ]
 

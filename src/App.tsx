@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 import { GlobalLoaderGate } from './components/GlobalLoaderGate'
 import { ToastProvider } from './components/Toast'
+import { SupportChat } from './components/SupportChat'
 
 function App() {
   const location = useLocation()
@@ -21,6 +22,7 @@ function App() {
           </GlobalLoaderGate>
         </main>
         {!hideChrome && <Footer />}
+        <SupportChat />
       </div>
     </ToastProvider>
   )

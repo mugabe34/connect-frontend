@@ -11,15 +11,11 @@ import {
   Package,
   Bookmark,
   TrendingUp,
-  ChevronRight,
-  Clock,
   SlidersHorizontal,
   Camera,
-  ShoppingBag,
   Signal,
   Wifi,
   BatteryFull,
-  Zap,
   ShieldCheck,
 } from 'lucide-react';
 import { api, getImageUrl } from '../lib/api';
@@ -78,7 +74,6 @@ export function BuyerDashboard() {
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'nearby'>('recent');
-  const [showFilters, setShowFilters] = useState(false);
 
   const [profile, setProfile] = useState<Partial<User>>({});
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -118,7 +113,9 @@ export function BuyerDashboard() {
       try {
         const [allProducts, saved] = await Promise.all([
           api<Product[]>('/api/products?limit=200'),
-          api<Product[]>('/api/products/liked/me'),
+          user?.role === 'buyer'
+            ? api<Product[]>('/api/products/liked/me')
+            : Promise.resolve([] as Product[]),
         ]);
         if (!mounted) return;
         const isConnectable = (p: Product) =>
@@ -136,7 +133,7 @@ export function BuyerDashboard() {
     }
     load();
     return () => { mounted = false; };
-  }, []);
+  }, [user]);
 
   const filteredProducts = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();

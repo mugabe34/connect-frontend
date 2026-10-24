@@ -5,6 +5,7 @@ import { api, getImageUrl } from '../lib/api'
 import type { Product } from '../types'
 import { useAuth } from '../providers/AuthProvider'
 import { useToast } from '../components/Toast'
+import { CONNECT_CONTACT_EMAILS, CONNECT_CONTACT_PHONES } from '../lib/contact'
 import {
     Users,
     Package,
@@ -308,7 +309,7 @@ export function Home() {
 
             {/* ================= FOOTER ================= */}
             <footer className="bg-sky-900 text-white py-16 px-4">
-                <div className="container-max grid md:grid-cols-3 gap-12">
+                <div className="container-max grid md:grid-cols-4 gap-8">
                     <div>
                         <h3 className="font-bold text-2xl mb-2">Connect</h3>
                         <p className="text-sky-200/70">Local trading, redefined.</p>
@@ -322,6 +323,11 @@ export function Home() {
                         >
                             Browse Products
                         </button>
+                    </div>
+                    <div className="space-y-2 text-sm text-sky-100">
+                        <h4 className="font-semibold text-white">Contact</h4>
+                        {CONNECT_CONTACT_EMAILS.map((email) => <a key={email} href={`mailto:${email}`} className="block break-all hover:text-sky-300">{email}</a>)}
+                        {CONNECT_CONTACT_PHONES.map((phone) => <a key={phone} href={`tel:${phone.replace(/\s/g, '')}`} className="block hover:text-sky-300">{phone}</a>)}
                     </div>
                     <div className="flex gap-6">
                         <Facebook className="hover:text-sky-300 cursor-pointer" />

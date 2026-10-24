@@ -1,22 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
 import conlogo from '../assets/conlogo-256.png'
-import { useState, useEffect } from 'react'
-import { api } from '../lib/api'
-
-interface ContactInfo {
-  email: string;
-  phone: string;
-  location: string;
-}
+import { CONNECT_CONTACT_EMAILS, CONNECT_CONTACT_PHONES } from '../lib/contact'
 
 export function Footer() {
   const { pathname } = useLocation()
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null)
-
-  useEffect(() => {
-    api<ContactInfo>('/api/contact-info').then(setContactInfo)
-  }, [])
-
   if (pathname === '/') return null
   return (
     <footer className="border-t bg-white">
@@ -30,13 +17,11 @@ export function Footer() {
         </div>
         <div>
           <div className="font-semibold mb-2">Contact</div>
-          {contactInfo && (
-            <>
-              <div>Email: {contactInfo.email}</div>
-              <div>Phone: {contactInfo.phone}</div>
-              <div>Location: {contactInfo.location}</div>
-            </>
-          )}
+          <>
+            <div>Email: {CONNECT_CONTACT_EMAILS.join(', ')}</div>
+            <div>Phone: {CONNECT_CONTACT_PHONES.join(' / ')}</div>
+            <div>Location: Kigali, Rwanda</div>
+          </>
         </div>
         <div>
           <div className="font-semibold mb-2">Company</div>
